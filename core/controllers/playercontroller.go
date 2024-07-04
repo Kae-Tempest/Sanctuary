@@ -170,7 +170,7 @@ func AddItemToPlayerInventory(c *gin.Context) {
 
 	// verif if user had already item
 	var playerInventory []entities.Inventory
-	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT * FROM inventory where player_id = $1`, playerID)
+	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where player_id = $1`, playerID)
 	if err != nil {
 		slog.Error("Error during selection player inventory with id:"+playerID, err)
 		c.String(http.StatusBadRequest, "bad request")
@@ -193,6 +193,7 @@ func AddItemToPlayerInventory(c *gin.Context) {
 			haveItem = true
 			break
 		} else {
+			haveItem = false
 			continue
 		}
 	}
@@ -216,8 +217,126 @@ func AddItemToPlayerInventory(c *gin.Context) {
 	}
 }
 func AddPetToPlayer(c *gin.Context) {
+	type Body struct {
+		PetId int
+	}
+	db := database.Connect()
+	playerID := c.Param("id")
+	var body Body
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var selectedPet entities.PetsMounts
+	err := pgxscan.Get(ctx, db, &selectedPet, `SELECT id FROM pets_mounts where id = $1`, body.PetId)
+	if err != nil {
+		slog.Error("Pet doesn't exist", err)
+		c.JSON(http.StatusNotFound, "Pet with this ID doesn't exist !")
+		return
+	}
+
+	var playerPets []entities.UserPet
+	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM user_pets_mounts where player_id = $1`, playerID)
+	if err != nil {
+		slog.Error("Error during selection player pets with id:"+playerID, err)
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	if len(playerPets) <= 0 {
+		_, err = db.Exec(ctx, `INSERT into user_pets_mounts (player_id, pet_id) values ($1,$2)`, playerID, body.PetId)
+		if err != nil {
+			slog.Error("Error during insertion in player pets with id:"+playerID, err)
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+		c.JSON(http.StatusCreated, "First pet get by User")
+	}
+
+	var havePet = false
+	for _, pet := range playerPets {
+		if pet.PetID == body.PetId {
+			havePet = true
+			break
+		} else {
+			havePet = false
+			continue
+		}
+	}
+
+	if havePet {
+		c.JSON(http.StatusBadRequest, "User already have this pet")
+	} else {
+		_, err = db.Exec(ctx, `INSERT into user_pets_mounts (player_id, pet_id) values ($1,$2)`, playerID, body.PetId)
+		if err != nil {
+			slog.Error("Error during insertion in player pets with id:"+playerID, err)
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+		c.JSON(http.StatusCreated, "User tamed this pet")
+	}
 
 }
 func AddSkillToPlayer(c *gin.Context) {
+	type Body struct {
+		SkillId int
+	}
+	db := database.Connect()
+	playerID := c.Param("id")
+	var body Body
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var selectedSkill entities.Skill
+	err := pgxscan.Get(ctx, db, &selectedSkill, `SELECT id FROM skills where id = $1`, body.SkillId)
+	if err != nil {
+		slog.Error("Pet doesn't exist", err)
+		c.JSON(http.StatusNotFound, "Pet with this ID doesn't exist !")
+		return
+	}
+
+	var playerSkills []entities.UserSkill
+	err = pgxscan.Select(ctx, db, &playerSkills, `SELECT skill_id FROM user_skill where player_id = $1`, playerID)
+	if err != nil {
+		slog.Error("Error during selection player pets with id:"+playerID, err)
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	if len(playerSkills) <= 0 {
+		_, err = db.Exec(ctx, `INSERT into user_skill (player_id, skill_id) values ($1,$2)`, playerID, body.SkillId)
+		if err != nil {
+			slog.Error("Error during insertion in player skill with id:"+playerID, err)
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+		c.JSON(http.StatusCreated, "First pet get by User")
+	}
+
+	var haveSkill = false
+	for _, skill := range playerSkills {
+		if skill.SkillID == body.SkillId {
+			haveSkill = true
+			break
+		} else {
+			haveSkill = false
+			continue
+		}
+	}
+
+	if haveSkill {
+		c.JSON(http.StatusBadRequest, "User already have this skill")
+	} else {
+		_, err = db.Exec(ctx, `INSERT into user_skill (player_id, skill_id) values ($1,$2)`, playerID, body.SkillId)
+		if err != nil {
+			slog.Error("Error during insertion in player skill with id:"+playerID, err)
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+		c.JSON(http.StatusCreated, "User tamed this skill")
+	}
 
 }
