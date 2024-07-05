@@ -1,6 +1,6 @@
 # Web Game RPG
 
-# WORK IN PROGRESS
+### WORK IN PROGRESS
 
 Front (Svelte ?) : waiting for init
 BDD (PGSQL) : In Progress
