@@ -22,7 +22,7 @@ func main() {
 		})
 		c.Done()
 	})
-
+	// GET \\
 	r.GET("/players", controllers.GetAllPlayers)
 	r.GET("/player/:id", controllers.GetOnePlayer)
 	r.GET("/player/:id/stats", controllers.GetPlayerStats)
@@ -31,11 +31,18 @@ func main() {
 	r.GET("/player/:id/pets", controllers.GetPlayerPets)
 	r.GET("/player/:id/guild", controllers.GetPlayerGuild)
 	r.GET("/player/:id/skill", controllers.GetPlayerSkill)
+	// POST \\
 	r.POST("player/:id", controllers.CreatePlayer)
 	r.POST("/player/:id/inventory", controllers.AddItemToPlayerInventory)
 	r.POST("/player/:id/pets", controllers.AddPetToPlayer)
 	r.POST("/player/:id/skill", controllers.AddSkillToPlayer)
-
+	// PATCH \\
+	r.PATCH("/player/:id/update-stats", controllers.UpdatePlayerStats)
+	r.PATCH("/player/:id/update-equipment", controllers.UpdatePlayerEquipment)
+	r.PATCH("/player/:id/update-inventory", controllers.UpdatePlayerInventory)
+	r.PATCH("/player/:id/update-pets", controllers.UpdatePlayerPets)
+	r.PATCH("/player/:id/update-skillss", controllers.UpdatePlayerSkills)
+	//DELETE\\
 	err = r.Run()
 	if err != nil {
 		panic(err)
