@@ -96,7 +96,17 @@ func GetPlayerPets(c *gin.Context) {
 	c.Done()
 }
 func GetPlayerGuild(c *gin.Context) {
-
+	db := database.Connect()
+	id := c.Param("id")
+	var playerGuild entities.Guild
+	err := pgxscan.Get(ctx, db, &playerGuild, `SELECT * FROM guilds g join guilds_members gm on g.id = gm.guilds_id where gm.user_id = $1`, id)
+	if err != nil {
+		slog.Error("Error during selection player guild with id:"+id, err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+	c.JSON(http.StatusOK, &playerGuild)
+	c.Done()
 }
 func GetPlayerSkill(c *gin.Context) {
 	db := database.Connect()
