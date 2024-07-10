@@ -363,3 +363,14 @@ func AddSkillToPlayer(c *gin.Context) {
 	}
 
 }
+
+// PATCH \\
+func UpdatePlayerStats(c *gin.Context)     {}
+func UpdatePlayerEquipment(c *gin.Context) {}
+func UpdatePlayerInventory(c *gin.Context) {}
+func UpdatePlayerPets(c *gin.Context)      {}
+func UpdatePlayerSkills(c *gin.Context)    {}
+
+// DELETE \\
+
+func DeletePlayer(c *gin.Context) {}
