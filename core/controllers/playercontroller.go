@@ -20,8 +20,9 @@ func GetAllPlayers(c *gin.Context) {
 	err := pgxscan.Select(ctx, db, &players, `SELECT * FROM players`)
 	if err != nil {
 		slog.Error("Error during selection all player", err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
 	}
-	fmt.Println(&players)
 	if len(players) > 0 {
 		c.JSON(http.StatusOK, &players)
 	} else {
@@ -36,6 +37,8 @@ func GetOnePlayer(c *gin.Context) {
 	err := pgxscan.Get(ctx, db, &players, `SELECT * FROM players where ID = $1`, id)
 	if err != nil {
 		slog.Error("Error during selection player id:"+id, err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
 	}
 	c.JSON(http.StatusOK, &players)
 	c.Done()
@@ -47,6 +50,8 @@ func GetPlayerStats(c *gin.Context) {
 	err := pgxscan.Get(ctx, db, &playerStats, `SELECT * from stats where player_id = $1`, id)
 	if err != nil {
 		slog.Error("Error during selection player stats with id:"+id, err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
 	}
 	c.JSON(http.StatusOK, &playerStats)
 	c.Done()
@@ -58,6 +63,8 @@ func GetPlayerEquipment(c *gin.Context) {
 	err := pgxscan.Get(ctx, db, &playerEquipment, `SELECT * from equipment where player_id = $1`, id)
 	if err != nil {
 		slog.Error("Error during selection player equipments with id:"+id, err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
 	}
 	c.JSON(http.StatusOK, &playerEquipment)
 	c.Done()
@@ -69,6 +76,8 @@ func GetPlayerInventory(c *gin.Context) {
 	err := pgxscan.Get(ctx, db, &playerInventory, `SELECT * from inventory where player_id = $1`, id)
 	if err != nil {
 		slog.Error("Error during selection player equipments with id:"+id, err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
 	}
 	c.JSON(http.StatusOK, &playerInventory)
 	c.Done()
@@ -77,9 +86,11 @@ func GetPlayerPets(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 	var playerPets []entities.UserPet
-	err := pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id from user_pets_mounts where player_id = $1`, id)
+	err := pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM user_pets_mounts where player_id = $1`, id)
 	if err != nil {
 		slog.Error("Error during selection player pet with id:"+id, err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
 	}
 	c.JSON(http.StatusOK, &playerPets)
 	c.Done()
@@ -94,6 +105,8 @@ func GetPlayerSkill(c *gin.Context) {
 	err := pgxscan.Select(ctx, db, &playerSkill, `SELECT * from user_skill where player_id = $1`, id)
 	if err != nil {
 		slog.Error("Error during selection player Skill with id:"+id, err)
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
 	}
 	c.JSON(http.StatusOK, &playerSkill)
 	c.Done()
