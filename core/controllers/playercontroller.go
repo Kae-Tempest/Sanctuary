@@ -130,7 +130,6 @@ func CreatePlayer(c *gin.Context) {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
-	fmt.Println(playerForm)
 	_, err := db.Exec(ctx, `INSERT INTO players (email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id) values ($1, $2, $3, $4, 0, 1, 0, 10, 50, 1)`,
 		playerForm.Email, playerForm.Username, playerForm.RaceID, playerForm.JobID)
 	if err != nil {

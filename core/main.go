@@ -41,8 +41,9 @@ func main() {
 	r.PATCH("/player/:id/update-equipment", controllers.UpdatePlayerEquipment)
 	r.PATCH("/player/:id/update-inventory", controllers.UpdatePlayerInventory)
 	r.PATCH("/player/:id/update-pets", controllers.UpdatePlayerPets)
-	r.PATCH("/player/:id/update-skillss", controllers.UpdatePlayerSkills)
+	r.PATCH("/player/:id/update-skills", controllers.UpdatePlayerSkills)
 	//DELETE\\
+	r.DELETE("/player/:id", controllers.DeletePlayer)
 	err = r.Run()
 	if err != nil {
 		panic(err)
