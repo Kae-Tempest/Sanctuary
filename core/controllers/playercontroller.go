@@ -364,7 +364,53 @@ func AddSkillToPlayer(c *gin.Context) {
 }
 
 // PATCH \\
-func UpdatePlayerStats(c *gin.Context)     {}
+func UpdatePlayerStats(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+	var playerStatsForm entities.Stats
+	if err := c.ShouldBindBodyWithJSON(&playerStatsForm); err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+	var player entities.Player
+	err := pgxscan.Get(ctx, db, &player, `SELECT id FROM players where id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+	var playerStats entities.Stats
+	err = pgxscan.Get(ctx, db, &playerStats, `SELECT * FROM stats where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, err = db.Exec(ctx, `UPDATE stats set (strength , charisma , constitution, dexterity, hp, intelligence, mana, stamina, wisdom) = ($2,$3,$4,$5,$6,$7,$8,$9,$10) where player_id = $1`,
+		id, playerStats.Strength+playerStatsForm.Strength,
+		playerStats.Charisma+playerStatsForm.Charisma,
+		playerStats.Constitution+playerStatsForm.Constitution,
+		playerStats.Dexterity+playerStatsForm.Dexterity,
+		playerStats.HP+playerStatsForm.HP,
+		playerStats.Intelligence+playerStatsForm.Intelligence,
+		playerStats.Mana+playerStatsForm.Mana,
+		playerStats.Stamina+playerStatsForm.Stamina,
+		playerStats.Wisdom+playerStatsForm.Wisdom)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	var newPlayerStats entities.Stats
+	err = pgxscan.Get(ctx, db, &newPlayerStats, `SELECT * FROM stats where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.JSON(http.StatusOK, &newPlayerStats)
+	c.Done()
+
+}
 func UpdatePlayerEquipment(c *gin.Context) {}
 func UpdatePlayerInventory(c *gin.Context) {}
 func UpdatePlayerPets(c *gin.Context)      {}
