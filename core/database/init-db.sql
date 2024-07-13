@@ -1,10 +1,24 @@
+create sequence compagnies_id_seq
+    as integer;
+
+alter sequence compagnies_id_seq owner to postgres;
+
+create sequence ressources_id_seq
+    as integer;
+
+alter sequence ressources_id_seq owner to postgres;
+
 create table races
 (
     id          serial
         constraint races_pk
             primary key,
     name        varchar(30),
-    description text
+    description text,
+    mana        integer,
+    stamina     integer,
+    wisdom      integer,
+    charisma    integer
 );
 
 alter table races
@@ -63,6 +77,8 @@ create table guilds
 
 alter table guilds
     owner to postgres;
+
+alter sequence compagnies_id_seq owned by guilds.id;
 
 create table skills
 (
@@ -183,15 +199,15 @@ alter table players
 
 create table inventory
 (
-    user_id  integer
+    player_id integer
         constraint inventory_players_id_fk
             references players,
-    item_id  integer
+    item_id   integer
         constraint inventory_pk
             unique
         constraint inventory_items_id_fk
             references items,
-    quantity integer
+    quantity  integer
 );
 
 alter table inventory
@@ -215,19 +231,19 @@ alter table guilds_members
 
 create table equipment
 (
-    player_id   integer
+    player_id  integer
         constraint equipment_players_id_fk
             references players,
-    helmet      integer,
-    chestplate  integer,
-    leggings    integer,
-    boots       integer,
-    mainhand    integer,
-    offhand     integer,
-    accessory_0 integer,
-    accessory_1 integer,
-    accessory_2 integer,
-    accessory_3 integer
+    helmet     integer,
+    chestplate integer,
+    leggings   integer,
+    boots      integer,
+    mainhand   integer,
+    offhand    integer,
+    accesory_0 integer,
+    accesory_1 integer,
+    accesory_2 integer,
+    accesory_3 integer
 );
 
 alter table equipment
@@ -328,6 +344,8 @@ create table resources
 
 alter table resources
     owner to postgres;
+
+alter sequence ressources_id_seq owned by resources.id;
 
 create table ressourceinventory
 (

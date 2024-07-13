@@ -411,7 +411,135 @@ func UpdatePlayerStats(c *gin.Context) {
 	c.Done()
 
 }
-func UpdatePlayerEquipment(c *gin.Context) {}
+func UpdatePlayerEquipment(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+
+	type body struct {
+		itemID      int
+		Emplacement string
+	}
+
+	var playerEquipmentForm body
+	if err := c.ShouldBindBodyWithJSON(&playerEquipmentForm); err != nil {
+		c.String(http.StatusBadRequest, "bad request during binding body")
+		return
+	}
+
+	var player entities.Player
+	err := pgxscan.Get(ctx, db, &player, `SELECT id FROM players where id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request selecting player")
+		return
+	}
+
+	var playerEquipments entities.Equipment
+	err = pgxscan.Get(ctx, db, &playerEquipments, `SELECT * FROM equipment where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request during getting current equipment"+err.Error())
+		return
+	}
+
+	switch playerEquipmentForm.Emplacement {
+	case "Helmet":
+		if checkEquipmentEmplacement(playerEquipments, "Helmet") {
+			// move equip item to inventory and equip selected item
+			fmt.Println(playerEquipments.Helmet)
+		} else {
+			// equip selected item
+			fmt.Println("any Equipment")
+		}
+	case "Chestplate":
+		if checkEquipmentEmplacement(playerEquipments, "Chestplate") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Leggings":
+		if checkEquipmentEmplacement(playerEquipments, "Leggings") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Boots":
+		if checkEquipmentEmplacement(playerEquipments, "Boots") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Mainhand":
+		if checkEquipmentEmplacement(playerEquipments, "MainHand") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Offhand":
+		if checkEquipmentEmplacement(playerEquipments, "OffHand") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Accesory0":
+		if checkEquipmentEmplacement(playerEquipments, "Accesory0") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Accesory1":
+		if checkEquipmentEmplacement(playerEquipments, "Accesory1") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Accesory2":
+		if checkEquipmentEmplacement(playerEquipments, "Accesory2") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+		}
+	case "Accesory3":
+		if checkEquipmentEmplacement(playerEquipments, "Accesory3") {
+			// move equip item to inventory and equip selected item
+		} else {
+			// equip selected item
+
+		}
+	default:
+		break
+	}
+	// if equipment != null
+	// move equip item to inventory and equip selected item
+	// else equip selected item
+
+}
+
+func checkEquipmentEmplacement(playerEquipments entities.Equipment, emplacement string) bool {
+	switch emplacement {
+	case "Helmet":
+		return playerEquipments.Helmet > 0
+	case "Chestplate":
+		return playerEquipments.Chestplate > 0
+	case "Leggings":
+		return playerEquipments.Leggings > 0
+	case "Boots":
+		return playerEquipments.Boots > 0
+	case "Mainhand":
+		return playerEquipments.Mainhand > 0
+	case "Offhand":
+		return playerEquipments.Offhand > 0
+	case "Accesory0":
+		return playerEquipments.Accesory0 > 0
+	case "Accesory1":
+		return playerEquipments.Accesory1 > 0
+	case "Accesory2":
+		return playerEquipments.Accesory2 > 0
+	case "Accesory3":
+		return playerEquipments.Accesory3 > 0
+	default:
+		return false
+	}
+}
+
 func UpdatePlayerInventory(c *gin.Context) {}
 func UpdatePlayerPets(c *gin.Context)      {}
 func UpdatePlayerSkills(c *gin.Context)    {}
