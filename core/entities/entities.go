@@ -157,17 +157,17 @@ type PetsMounts struct {
 	Speed       int  `json:"speed"` // 0 = slow, 1 = normal, 2 = fast
 }
 type Equipment struct {
-	PlayerId   int `json:"player_id"`
-	Helmet     int `json:"helmet"`
-	Chestplate int `json:"chestplate"`
-	Leggings   int `json:"leggings"`
-	Boots      int `json:"boots"`
-	Mainhand   int `json:"mainhand"`
-	Offhand    int `json:"offhand"`
-	Accesory0  int `json:"accesory_0"`
-	Accesory1  int `json:"accesory_1"`
-	Accesory2  int `json:"accesory_2"`
-	Accesory3  int `json:"accesory_3"`
+	PlayerId       int `json:"player_id"`
+	Helmet         int `json:"helmet"`
+	Chestplate     int `json:"chestplate"`
+	Leggings       int `json:"leggings"`
+	Boots          int `json:"boots"`
+	Mainhand       int `json:"mainhand"`
+	Offhand        int `json:"offhand"`
+	AccessorySlot0 int `json:"accessory_slot_0" db:"accessory_slot_0"`
+	AccessorySlot1 int `json:"accessory_slot_1" db:"accessory_slot_1"`
+	AccessorySlot2 int `json:"accessory_slot_2" db:"accessory_slot_2"`
+	AccessorySlot3 int `json:"accessory_slot_3" db:"accessory_slot_3"`
 }
 
 type Creatures struct {

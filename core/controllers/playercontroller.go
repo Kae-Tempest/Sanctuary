@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
 	"net/http"
 	"sanctuary-api/database"
@@ -433,84 +434,74 @@ func UpdatePlayerEquipment(c *gin.Context) {
 		return
 	}
 
+	var selectedItem entities.Items
+	err = pgxscan.Get(ctx, db, &selectedItem, `SELECT id FROM items where id = $1`, playerEquipmentForm.itemID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request selecting item")
+		return
+	}
+
 	var playerEquipments entities.Equipment
 	err = pgxscan.Get(ctx, db, &playerEquipments, `SELECT * FROM equipment where player_id = $1`, id)
 	if err != nil {
-		c.String(http.StatusBadRequest, "bad request during getting current equipment"+err.Error())
+		c.String(http.StatusBadRequest, "bad request during getting current equipment")
 		return
 	}
 
 	switch playerEquipmentForm.Emplacement {
 	case "Helmet":
 		if checkEquipmentEmplacement(playerEquipments, "Helmet") {
-			// move equip item to inventory and equip selected item
-			fmt.Println(playerEquipments.Helmet)
-		} else {
-			// equip selected item
-			fmt.Println("any Equipment")
+			doUpsertItemInInventory(playerEquipments.Helmet, playerEquipments.PlayerId, db, c)
 		}
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "helmet", db, c)
 	case "Chestplate":
 		if checkEquipmentEmplacement(playerEquipments, "Chestplate") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.Chestplate, playerEquipments.PlayerId, db, c)
 		}
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "chestplate", db, c)
 	case "Leggings":
 		if checkEquipmentEmplacement(playerEquipments, "Leggings") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.Leggings, playerEquipments.PlayerId, db, c)
 		}
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "leggings", db, c)
 	case "Boots":
 		if checkEquipmentEmplacement(playerEquipments, "Boots") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.Boots, playerEquipments.PlayerId, db, c)
 		}
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "boots", db, c)
 	case "Mainhand":
 		if checkEquipmentEmplacement(playerEquipments, "MainHand") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.Mainhand, playerEquipments.PlayerId, db, c)
 		}
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "mainhand", db, c)
 	case "Offhand":
 		if checkEquipmentEmplacement(playerEquipments, "OffHand") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.Offhand, playerEquipments.PlayerId, db, c)
 		}
-	case "Accesory0":
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "offhand", db, c)
+	case "AccessorySlot0":
 		if checkEquipmentEmplacement(playerEquipments, "Accesory0") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.AccessorySlot0, playerEquipments.PlayerId, db, c)
 		}
-	case "Accesory1":
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_0", db, c)
+	case "AccessorySlot1":
 		if checkEquipmentEmplacement(playerEquipments, "Accesory1") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.AccessorySlot1, playerEquipments.PlayerId, db, c)
 		}
-	case "Accesory2":
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_2", db, c)
+	case "AccessorySlot2":
 		if checkEquipmentEmplacement(playerEquipments, "Accesory2") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
+			doUpsertItemInInventory(playerEquipments.AccessorySlot2, playerEquipments.PlayerId, db, c)
 		}
-	case "Accesory3":
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_3", db, c)
+	case "AccessorySlot3":
 		if checkEquipmentEmplacement(playerEquipments, "Accesory3") {
-			// move equip item to inventory and equip selected item
-		} else {
-			// equip selected item
-
+			doUpsertItemInInventory(playerEquipments.AccessorySlot3, playerEquipments.PlayerId, db, c)
 		}
+		doUpdateEquipment(playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_4", db, c)
 	default:
 		break
 	}
-	// if equipment != null
-	// move equip item to inventory and equip selected item
-	// else equip selected item
-
 }
 
 func checkEquipmentEmplacement(playerEquipments entities.Equipment, emplacement string) bool {
@@ -527,16 +518,36 @@ func checkEquipmentEmplacement(playerEquipments entities.Equipment, emplacement 
 		return playerEquipments.Mainhand > 0
 	case "Offhand":
 		return playerEquipments.Offhand > 0
-	case "Accesory0":
-		return playerEquipments.Accesory0 > 0
-	case "Accesory1":
-		return playerEquipments.Accesory1 > 0
-	case "Accesory2":
-		return playerEquipments.Accesory2 > 0
-	case "Accesory3":
-		return playerEquipments.Accesory3 > 0
+	case "AccessorySlot0":
+		return playerEquipments.AccessorySlot0 > 0
+	case "AccessorySlot1":
+		return playerEquipments.AccessorySlot1 > 0
+	case "AccessorySlot2":
+		return playerEquipments.AccessorySlot2 > 0
+	case "AccessorySlot3":
+		return playerEquipments.AccessorySlot3 > 0
 	default:
 		return false
+	}
+}
+
+func doUpsertItemInInventory(itemID int, playerID int, db *pgxpool.Pool, c *gin.Context) {
+	_, err := db.Exec(ctx, `
+INSERT INTO inventory (item_id, quantity, player_id) VALUES ($1, 1 ,$2)
+ON CONFLICT (item_id) DO UPDATE
+SET quantity = inventory.quantity + EXCLUDED.quantity;`, itemID, playerID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request during upsert item into inventory")
+		return
+	}
+}
+
+func doUpdateEquipment(itemID int, playerID int, emplacement string, db *pgxpool.Pool, c *gin.Context) {
+	query := fmt.Sprintf("UPDATE equipment SET %s = $1 WHERE player_id = $2", emplacement)
+	_, err := db.Exec(ctx, query, itemID, playerID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request during updating equipment"+err.Error())
+		return
 	}
 }
 
