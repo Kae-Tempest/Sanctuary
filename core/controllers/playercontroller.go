@@ -417,7 +417,7 @@ func UpdatePlayerEquipment(c *gin.Context) {
 	id := c.Param("id")
 
 	type body struct {
-		itemID      int
+		ItemID      int
 		Emplacement string
 	}
 
@@ -435,7 +435,7 @@ func UpdatePlayerEquipment(c *gin.Context) {
 	}
 
 	var selectedItem entities.Items
-	err = pgxscan.Get(ctx, db, &selectedItem, `SELECT id FROM items where id = $1`, playerEquipmentForm.itemID)
+	err = pgxscan.Get(ctx, db, &selectedItem, `SELECT id FROM items where id = $1`, playerEquipmentForm.ItemID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request selecting item")
 		return
@@ -451,57 +451,67 @@ func UpdatePlayerEquipment(c *gin.Context) {
 	switch playerEquipmentForm.Emplacement {
 	case "Helmet":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Helmet") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Helmet, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Helmet, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "helmet", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "helmet", db, c)
 	case "Chestplate":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Chestplate") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Chestplate, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Chestplate, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "chestplate", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "chestplate", db, c)
 	case "Leggings":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Leggings") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Leggings, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Leggings, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "leggings", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "leggings", db, c)
 	case "Boots":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Boots") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Boots, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Boots, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "boots", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "boots", db, c)
 	case "Mainhand":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "MainHand") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Mainhand, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Mainhand, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "mainhand", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "mainhand", db, c)
 	case "Offhand":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "OffHand") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Offhand, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Offhand, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "offhand", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "offhand", db, c)
 	case "AccessorySlot0":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory0") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot0, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot0, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_0", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_0", db, c)
 	case "AccessorySlot1":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory1") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot1, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot1, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_2", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_2", db, c)
 	case "AccessorySlot2":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory2") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot2, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot2, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_3", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_3", db, c)
 	case "AccessorySlot3":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory3") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot3, playerEquipments.PlayerId, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot3, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.itemID, playerEquipments.PlayerId, "accessory_slot_4", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_4", db, c)
 	default:
 		break
 	}
+
+	var newPlayerEquipment entities.Equipment
+	err = pgxscan.Get(ctx, db, &newPlayerEquipment, `SELECT * FROM equipment where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request during getting current equipment")
+		return
+	}
+
+	c.JSON(http.StatusOK, &newPlayerEquipment)
+	c.Done()
 }
 
 func UpdatePlayerInventory(c *gin.Context) {}
