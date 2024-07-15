@@ -513,6 +513,47 @@ func UpdatePlayerEquipment(c *gin.Context) {
 	c.JSON(http.StatusOK, &newPlayerEquipment)
 	c.Done()
 }
+func UpdatePlayerInventory(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+
+	type body struct {
+		itemID   int
+		quantity int
+	}
+
+	var playerItemForm body
+	if err := c.ShouldBindBodyWithJSON(&playerItemForm); err != nil {
+		c.String(http.StatusBadRequest, "bad request during binding body")
+		return
+	}
+
+	var player entities.Player
+	err := pgxscan.Get(ctx, db, &player, `SELECT id FROM players where id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request selecting player")
+		return
+	}
+
+	var selectedItem entities.Items
+	err = pgxscan.Get(ctx, db, &selectedItem, `SELECT id FROM items where id = $1`, playerItemForm.itemID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request selecting item")
+		return
+	}
+
+	repository.DoUpsertItemInInventory(ctx, playerItemForm.itemID, player.ID, playerItemForm.quantity, db, c)
+
+	var playerInventory []entities.Inventory
+	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where player_id = $1`, player.ID)
+	if err != nil {
+		slog.Error("Error during selection player inventory with id:", err)
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+	c.JSON(http.StatusOK, &playerInventory)
+	c.Done()
+}
 
 func UpdatePlayerInventory(c *gin.Context) {}
 func UpdatePlayerPets(c *gin.Context)      {}
