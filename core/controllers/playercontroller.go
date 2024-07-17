@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/georgysavva/scany/v2/pgxscan"
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"net/http"
 	"sanctuary-api/database"
 	"sanctuary-api/entities"
 	"sanctuary-api/repository"
+
+	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 var ctx = context.Background()
@@ -600,8 +601,6 @@ func UpdatePlayerPets(c *gin.Context) {
 		return
 	}
 	if playerPets.PetID != 0 {
-
-		// give pet's scroll
 		var creature entities.Creatures
 		err = pgxscan.Get(ctx, db, &creature, `SELECT name from creatures where id = $1`, selectedPet.CreatureID)
 
@@ -614,8 +613,118 @@ func UpdatePlayerPets(c *gin.Context) {
 		c.Done()
 	}
 }
-func UpdatePlayerSkills(c *gin.Context) {}
+func UpdatePlayerSkills(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+	type Body struct {
+		SkillID int
+	}
+
+	var playerSkillForm Body
+	err := c.ShouldBindBodyWithJSON(&playerSkillForm)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// check if player exist
+	var player entities.Player
+	err = pgxscan.Get(ctx, db, &player, `SELECT id FROM players where id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request selecting player")
+		return
+	}
+	// check if skill exist
+	var selectedSkill entities.Skill
+	err = pgxscan.Get(ctx, db, &selectedSkill, `SELECT id, name FROM skills where id = $1`, playerSkillForm.SkillID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request selecting pets")
+		return
+	}
+	// check if player already have this pet
+	var playerSkills entities.UserSkill
+	err = pgxscan.Get(ctx, db, &playerSkills, `SELECT skill_id FROM user_skill where skill_id = $1`, playerSkillForm.SkillID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		_, insertErr := db.Exec(ctx, `INSERT INTO user_skill (skill_id, player_id) values ($1,$2)`, playerSkillForm.SkillID, id)
+		if insertErr != nil {
+			c.String(http.StatusBadRequest, "bad request inserting user's skill")
+			return
+		}
+		c.JSON(http.StatusOK, "New SKill Added")
+		c.Done()
+	}
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		c.String(http.StatusBadRequest, "bad request selecting user's skill")
+		return
+	}
+
+	if playerSkills.SkillID != 0 {
+
+		var skillScroll entities.Items
+		err = pgxscan.Get(ctx, db, &skillScroll, `SELECT * FROM items where name like '%$1%'`, selectedSkill.Name)
+
+		repository.DoUpsertItemInInventory(ctx, skillScroll.ID, player.ID, 1, db, c)
+
+		c.JSON(http.StatusOK, "You Already have this skill, you got his scroll")
+		c.Done()
+	}
+
+}
 
 // DELETE \\
 
-func DeletePlayer(c *gin.Context) {}
+func DeletePlayer(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+	// check if player exist
+	var player entities.Player
+	err := pgxscan.Get(ctx, db, &player, `SELECT id FROM players where id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request selecting player")
+		return
+	}
+
+	// delete pets
+	_, err = db.Exec(ctx, `DELETE from user_pets_mounts  where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request deleting player's pets")
+		return
+	}
+	// delete skills
+	_, err = db.Exec(ctx, `DELETE from user_skill where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad  request deleting player's skills")
+		return
+	}
+	// delete inventory
+	_, err = db.Exec(ctx, `DELETE from inventory where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad  request deleting player's inventory")
+		return
+	}
+	// delete equipment
+	_, err = db.Exec(ctx, `DELETE from equipment where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad  request deleting player's equipment")
+		return
+	}
+	// delete stat
+	_, err = db.Exec(ctx, `DELETE from stats where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad  request deleting player's stats")
+		return
+	}
+	// delete player action
+
+	_, err = db.Exec(ctx, `DELETE from players_actions where player_id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad  request deleting player's action")
+		return
+	}
+
+	// delete player
+	_, err = db.Exec(ctx, `DELETE from players where id = $1`, id)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad  request deleting player")
+		return
+	}
+}
