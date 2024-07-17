@@ -3,8 +3,6 @@ package controllers
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log/slog"
 	"net/http"
 	"sanctuary-api/database"
 	"sanctuary-api/entities"
@@ -23,7 +21,6 @@ func GetAllPlayers(c *gin.Context) {
 	var players []entities.Player
 	err := pgxscan.Select(ctx, db, &players, `SELECT * FROM players`)
 	if err != nil {
-		slog.Error("Error during selection all player", err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -40,7 +37,6 @@ func GetOnePlayer(c *gin.Context) {
 	var players entities.Player
 	err := pgxscan.Get(ctx, db, &players, `SELECT * FROM players where ID = $1`, id)
 	if err != nil {
-		slog.Error("Error during selection player id:"+id, err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -53,7 +49,6 @@ func GetPlayerStats(c *gin.Context) {
 	var playerStats entities.Stats
 	err := pgxscan.Get(ctx, db, &playerStats, `SELECT * from stats where player_id = $1`, id)
 	if err != nil {
-		slog.Error("Error during selection player stats with id:"+id, err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -66,7 +61,6 @@ func GetPlayerEquipment(c *gin.Context) {
 	var playerEquipment entities.Equipment
 	err := pgxscan.Get(ctx, db, &playerEquipment, `SELECT * from equipment where player_id = $1`, id)
 	if err != nil {
-		slog.Error("Error during selection player equipments with id:"+id, err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -79,7 +73,6 @@ func GetPlayerInventory(c *gin.Context) {
 	var playerInventory entities.Inventory
 	err := pgxscan.Get(ctx, db, &playerInventory, `SELECT * from inventory where player_id = $1`, id)
 	if err != nil {
-		slog.Error("Error during selection player equipments with id:"+id, err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -92,7 +85,6 @@ func GetPlayerPets(c *gin.Context) {
 	var playerPets []entities.UserPet
 	err := pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM user_pets_mounts where player_id = $1`, id)
 	if err != nil {
-		slog.Error("Error during selection player pet with id:"+id, err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -105,7 +97,6 @@ func GetPlayerGuild(c *gin.Context) {
 	var playerGuild entities.Guild
 	err := pgxscan.Get(ctx, db, &playerGuild, `SELECT * FROM guilds g join guilds_members gm on g.id = gm.guilds_id where gm.user_id = $1`, id)
 	if err != nil {
-		slog.Error("Error during selection player guild with id:"+id, err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -118,7 +109,6 @@ func GetPlayerSkill(c *gin.Context) {
 	var playerSkill []entities.Skill
 	err := pgxscan.Select(ctx, db, &playerSkill, `SELECT * from user_skill where player_id = $1`, id)
 	if err != nil {
-		slog.Error("Error during selection player Skill with id:"+id, err)
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -137,7 +127,6 @@ func CreatePlayer(c *gin.Context) {
 	_, err := db.Exec(ctx, `INSERT INTO players (email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id) values ($1, $2, $3, $4, 0, 1, 0, 10, 50, 1)`,
 		playerForm.Email, playerForm.Username, playerForm.RaceID, playerForm.JobID)
 	if err != nil {
-		slog.Error("Error during inserting player into database", err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -148,7 +137,6 @@ func CreatePlayer(c *gin.Context) {
 	var playerJob entities.Job
 	err = pgxscan.Get(ctx, db, &playerJob, `SELECT * from jobs where id = $1`, playerForm.JobID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Error during selection of jobs with id: %d", playerForm.JobID), err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -156,7 +144,6 @@ func CreatePlayer(c *gin.Context) {
 	var playerRace entities.Race
 	err = pgxscan.Get(ctx, db, &playerRace, `SELECT * from races where id = $1`, playerForm.RaceID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Error during selection of race with id: %d", playerForm.RaceID), err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -164,7 +151,6 @@ func CreatePlayer(c *gin.Context) {
 	_, err = db.Exec(ctx, `INSERT INTO stats (player_id, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, hp) values ($1, $2, $3, $4,$5,$6,$7,$8,$9,20)`,
 		playerID, playerJob.Strength, playerJob.Constitution, playerRace.Mana, playerRace.Stamina, playerJob.Dexterity, playerJob.Intelligence, playerRace.Wisdom, playerRace.Charisma)
 	if err != nil {
-		slog.Error("Error during inserting player stats into database", err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -189,7 +175,6 @@ func AddItemToPlayerInventory(c *gin.Context) {
 	var selectedItem entities.Items
 	err := pgxscan.Get(ctx, db, &selectedItem, `SELECT * FROM items where id = $1`, body.ItemID)
 	if err != nil {
-		slog.Error("Item doesn't  exist", err)
 		c.JSON(http.StatusNotFound, "Item with this ID doesn't exist !")
 		return
 	}
@@ -198,14 +183,12 @@ func AddItemToPlayerInventory(c *gin.Context) {
 	var playerInventory []entities.Inventory
 	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where player_id = $1`, playerID)
 	if err != nil {
-		slog.Error("Error during selection player inventory with id:"+playerID, err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 	if len(playerInventory) <= 0 {
 		_, err = db.Exec(ctx, `INSERT into inventory (player_id, item_id, quantity) values ($1,$2,$3)`, playerID, body.ItemID, body.Quantity)
 		if err != nil {
-			slog.Error("Error during insertion in player inventory with id:"+playerID, err)
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
@@ -227,7 +210,6 @@ func AddItemToPlayerInventory(c *gin.Context) {
 	if haveItem {
 		_, err = db.Exec(ctx, `UPDATE inventory SET quantity = $1 where player_id = $2`, quantity+body.Quantity, playerID)
 		if err != nil {
-			slog.Error("Error during updating in player inventory with id:"+playerID, err)
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
@@ -235,7 +217,6 @@ func AddItemToPlayerInventory(c *gin.Context) {
 	} else {
 		_, err = db.Exec(ctx, `INSERT into inventory (player_id, item_id, quantity) values ($1,$2,$3)`, playerID, body.ItemID, body.Quantity)
 		if err != nil {
-			slog.Error("Error during insertion in player inventory with id:"+playerID, err)
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
@@ -257,7 +238,6 @@ func AddPetToPlayer(c *gin.Context) {
 	var selectedPet entities.PetsMounts
 	err := pgxscan.Get(ctx, db, &selectedPet, `SELECT id FROM pets_mounts where id = $1`, body.PetId)
 	if err != nil {
-		slog.Error("Pet doesn't exist", err)
 		c.JSON(http.StatusNotFound, "Pet with this ID doesn't exist !")
 		return
 	}
@@ -265,7 +245,6 @@ func AddPetToPlayer(c *gin.Context) {
 	var playerPets []entities.UserPet
 	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM user_pets_mounts where player_id = $1`, playerID)
 	if err != nil {
-		slog.Error("Error during selection player pets with id:"+playerID, err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -273,7 +252,6 @@ func AddPetToPlayer(c *gin.Context) {
 	if len(playerPets) <= 0 {
 		_, err = db.Exec(ctx, `INSERT into user_pets_mounts (player_id, pet_id) values ($1,$2)`, playerID, body.PetId)
 		if err != nil {
-			slog.Error("Error during insertion in player pets with id:"+playerID, err)
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
@@ -296,7 +274,6 @@ func AddPetToPlayer(c *gin.Context) {
 	} else {
 		_, err = db.Exec(ctx, `INSERT into user_pets_mounts (player_id, pet_id) values ($1,$2)`, playerID, body.PetId)
 		if err != nil {
-			slog.Error("Error during insertion in player pets with id:"+playerID, err)
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
@@ -319,7 +296,6 @@ func AddSkillToPlayer(c *gin.Context) {
 	var selectedSkill entities.Skill
 	err := pgxscan.Get(ctx, db, &selectedSkill, `SELECT id FROM skills where id = $1`, body.SkillId)
 	if err != nil {
-		slog.Error("Pet doesn't exist", err)
 		c.JSON(http.StatusNotFound, "Pet with this ID doesn't exist !")
 		return
 	}
@@ -327,7 +303,6 @@ func AddSkillToPlayer(c *gin.Context) {
 	var playerSkills []entities.UserSkill
 	err = pgxscan.Select(ctx, db, &playerSkills, `SELECT skill_id FROM user_skill where player_id = $1`, playerID)
 	if err != nil {
-		slog.Error("Error during selection player pets with id:"+playerID, err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
@@ -335,7 +310,6 @@ func AddSkillToPlayer(c *gin.Context) {
 	if len(playerSkills) <= 0 {
 		_, err = db.Exec(ctx, `INSERT into user_skill (player_id, skill_id) values ($1,$2)`, playerID, body.SkillId)
 		if err != nil {
-			slog.Error("Error during insertion in player skill with id:"+playerID, err)
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
@@ -358,7 +332,6 @@ func AddSkillToPlayer(c *gin.Context) {
 	} else {
 		_, err = db.Exec(ctx, `INSERT into user_skill (player_id, skill_id) values ($1,$2)`, playerID, body.SkillId)
 		if err != nil {
-			slog.Error("Error during insertion in player skill with id:"+playerID, err)
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
@@ -550,7 +523,6 @@ func UpdatePlayerInventory(c *gin.Context) {
 	var playerInventory []entities.Inventory
 	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where player_id = $1`, player.ID)
 	if err != nil {
-		slog.Error("Error during selection player inventory with id:", err)
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
