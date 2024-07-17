@@ -44,6 +44,11 @@ func main() {
 	r.PATCH("/player/:id/update-skills", controllers.UpdatePlayerSkills)
 	//DELETE\\
 	r.DELETE("/player/:id", controllers.DeletePlayer)
+
+	r.GET("/creatures", controllers.GetAllCreatures)
+	r.GET("/creature/:id", controllers.GetOneCreature)
+	r.GET("/creature/:id/spawn", controllers.GetCreatureSpawn)
+
 	err = r.Run()
 	if err != nil {
 		panic(err)
