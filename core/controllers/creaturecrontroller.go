@@ -54,3 +54,18 @@ func GetCreatureSpawn(c *gin.Context) {
 	c.JSON(http.StatusOK, &creatureSpawn)
 	c.Done()
 }
+
+func GetCreatureSkill(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+
+	var creatureSkill []entities.CreatureSkill
+	err := pgxscan.Select(ctx, db, &creatureSkill, `SELECT * FROM creature_skill where creature_id = $1`, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.JSON(http.StatusOK, &creatureSkill)
+	c.Done()
+}
