@@ -48,6 +48,7 @@ func main() {
 	r.GET("/creatures", controllers.GetAllCreatures)
 	r.GET("/creature/:id", controllers.GetOneCreature)
 	r.GET("/creature/:id/spawn", controllers.GetCreatureSpawn)
+	r.GET("/creature/:id/skill", controllers.GetCreatureSkill)
 
 	err = r.Run()
 	if err != nil {
