@@ -2,13 +2,18 @@ package database
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"log/slog"
 	"os"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func Connect() *pgxpool.Pool {
 	ctx := context.Background()
-	db, _ := pgxpool.New(ctx, os.Getenv("DB_URL"))
-
+	db, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
+	if err != nil {
+		slog.Error("Error during database connection !")
+		panic(err)
+	}
 	return db
 }
