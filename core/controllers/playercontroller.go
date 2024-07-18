@@ -133,6 +133,10 @@ func CreatePlayer(c *gin.Context) {
 
 	var playerID int
 	err = pgxscan.Select(ctx, db, playerID, `SELECT id from players where email = $1`, playerForm.Email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
 	// Get Job Stats
 	var playerJob entities.Job
 	err = pgxscan.Get(ctx, db, &playerJob, `SELECT * from jobs where id = $1`, playerForm.JobID)
@@ -388,6 +392,38 @@ func UpdatePlayerStats(c *gin.Context) {
 	c.Done()
 
 }
+
+func UpdatePlayer(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+
+	type playerInfoUpdatable struct {
+		Exp           int
+		Level         int
+		InventorySize int
+		Po            int
+	}
+
+	var playerInfoUpdatableForm playerInfoUpdatable
+	if err := c.ShouldBindBodyWithJSON(&playerInfoUpdatableForm); err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	var selectedPlayer entities.Player
+	err := pgxscan.Get(ctx, db, &selectedPlayer, `SELECT * FROM players where id = $1`, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, err = db.Exec(ctx, `UPDATE player set (exp, level, inventory_size, po) = ($2,$3,$4,$5) where id = $1`, id, playerInfoUpdatableForm.Exp+selectedPlayer.Exp, playerInfoUpdatableForm.Level+selectedPlayer.Level, playerInfoUpdatableForm.InventorySize+selectedPlayer.InventorySize, playerInfoUpdatableForm.Po+selectedPlayer.Po)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+}
+
 func UpdatePlayerEquipment(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
@@ -575,9 +611,17 @@ func UpdatePlayerPets(c *gin.Context) {
 	if playerPets.PetID != 0 {
 		var creature entities.Creatures
 		err = pgxscan.Get(ctx, db, &creature, `SELECT name from creatures where id = $1`, selectedPet.CreatureID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
 
 		var petScroll entities.Items
 		err = pgxscan.Get(ctx, db, &petScroll, `SELECT * FROM items where name like '%$1%'`, creature.Name)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
 
 		repository.DoUpsertItemInInventory(ctx, petScroll.ID, player.ID, 1, db, c)
 
@@ -633,6 +677,10 @@ func UpdatePlayerSkills(c *gin.Context) {
 
 		var skillScroll entities.Items
 		err = pgxscan.Get(ctx, db, &skillScroll, `SELECT * FROM items where name like '%$1%'`, selectedSkill.Name)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
 
 		repository.DoUpsertItemInInventory(ctx, skillScroll.ID, player.ID, 1, db, c)
 
