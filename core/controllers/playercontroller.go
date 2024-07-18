@@ -424,6 +424,48 @@ func UpdatePlayer(c *gin.Context) {
 	}
 }
 
+func UpdatePlayerLocation(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+
+	var locationID int
+	if err := c.ShouldBindBodyWithJSON(&locationID); err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	// check if location exist
+	var locations entities.Locations
+	err := pgxscan.Get(ctx, db, &locations, `SELECT id FROM locations where id = $1`, locationID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+	// check if player exist
+	var player entities.Player
+	err = pgxscan.Get(ctx, db, &player, `SELECT * FROM players where id = $1`, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+	// move player
+	_, err = db.Exec(ctx, `UPDATE players SET location_id = $2 where id = $1`, id, locationID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	err = pgxscan.Get(ctx, db, &player, `SELECT * FROM players where id = $1`, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.JSON(http.StatusOK, &player)
+	c.Done()
+
+}
+
 func UpdatePlayerEquipment(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
