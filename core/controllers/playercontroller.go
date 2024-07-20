@@ -167,13 +167,21 @@ func CreatePlayer(c *gin.Context) {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
+
+	existingPlayer, epErr := repository.GetPlayerByEmail(ctx, db, playerForm.Email)
+	if errors.Is(epErr, pgx.ErrNoRows) {
+		c.JSON(http.StatusConflict, &existingPlayer)
+	}
+	if epErr != nil && !errors.Is(epErr, pgx.ErrNoRows) {
+		c.String(http.StatusBadRequest, "bad request")
+	}
+
 	_, err := db.Exec(ctx, `INSERT INTO players (email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id) values ($1, $2, $3, $4, 0, 1, 0, 10, 50, 1)`,
 		playerForm.Email, playerForm.Username, playerForm.RaceID, playerForm.JobID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
-
 	var playerID int
 	err = pgxscan.Select(ctx, db, playerID, `SELECT id from players where email = $1`, playerForm.Email)
 	if err != nil {
@@ -455,7 +463,6 @@ func UpdatePlayerStats(c *gin.Context) {
 	c.Done()
 
 }
-
 func UpdatePlayer(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
@@ -485,7 +492,6 @@ func UpdatePlayer(c *gin.Context) {
 		return
 	}
 }
-
 func UpdatePlayerLocation(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
@@ -527,7 +533,6 @@ func UpdatePlayerLocation(c *gin.Context) {
 	c.Done()
 
 }
-
 func UpdatePlayerEquipment(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
@@ -847,15 +852,12 @@ func DeletePlayer(c *gin.Context) {
 		return
 	}
 }
-
 func DeletePlayerItemInInventory(c *gin.Context) {
 
 }
-
 func DeletePlayerPets(c *gin.Context) {
 
 }
-
 func DeletePlayerSkill(c *gin.Context) {
 
 }
