@@ -243,7 +243,51 @@ func UpdateCreature(c *gin.Context) {
 
 }
 func UpdateCreatureSpawn(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
 
+	var creatureSpawnForm entities.CreatureSpawns
+	if err := c.ShouldBindBodyWithJSON(&creatureSpawnForm); err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	// check if creature exist
+	creature, creatureErr := repository.GetCreatureByID(ctx, db, id)
+	if creatureErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	// check if location exist
+	location, locationErr := repository.GetLocationByID(ctx, db, creatureSpawnForm.EmplacementID)
+	if locationErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+	// check if location do not already assign
+	var creatureSpawn entities.CreatureSpawns
+	err := pgxscan.Get(ctx, db, &creatureSpawn, `SELECT * FROM creaturespawn WHERE creature_id = $1 AND emplacement_id = $2`, creature.ID, location.ID)
+	if errors.Is(pgx.ErrNoRows, err) {
+		_, insertErr := db.Exec(ctx, `INSERT INTO creaturespawn (creature_id, emplacement_id, level_required, spawn_rate) values ($1,$2,$3,$4)`,
+			creature.ID, location.ID, creatureSpawnForm.LevelRequired, creatureSpawnForm.SpawnRate)
+		if insertErr != nil {
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+
+		c.JSON(http.StatusOK, &creatureSpawn)
+		c.Done()
+	}
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	if creatureSpawn.CreatureID == 0 {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
 }
 func UpdateCreatureSkill(c *gin.Context) {
 

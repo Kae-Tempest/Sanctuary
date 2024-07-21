@@ -44,3 +44,21 @@ func GetCreatureByName(ctx context.Context, db *pgxpool.Pool, creatureName strin
 	}
 	return creature, nil
 }
+
+func GetLocationByID(ctx context.Context, db *pgxpool.Pool, locationID int) (entities.Locations, error) {
+	var location entities.Locations
+	err := pgxscan.Get(ctx, db, &location, `SELECT * FROM locations where id = $1`, locationID)
+	if err != nil {
+		return location, err
+	}
+	return location, nil
+}
+
+func GetSkillByID(ctx context.Context, db *pgxpool.Pool, skillID int) (entities.Skill, error) {
+	var skill entities.Skill
+	err := pgxscan.Get(ctx, db, &skill, `SELECT * FROM skills where id = $1`, skillID)
+	if err != nil {
+		return skill, err
+	}
+	return skill, nil
+}
