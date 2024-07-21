@@ -7,7 +7,7 @@ import (
 	"sanctuary-api/entities"
 )
 
-func GetPlayerById(ctx context.Context, db *pgxpool.Pool, playerID string) (entities.Player, error) {
+func GetPlayerByID(ctx context.Context, db *pgxpool.Pool, playerID string) (entities.Player, error) {
 	var player entities.Player
 	err := pgxscan.Get(ctx, db, &player, `SELECT * FROM players where id = $1`, playerID)
 	if err != nil {
@@ -27,7 +27,7 @@ func GetPlayerByEmail(ctx context.Context, db *pgxpool.Pool, playerEmail string)
 	return player, nil
 }
 
-func GetCreatureById(ctx context.Context, db *pgxpool.Pool, creatureID string) (entities.Creatures, error) {
+func GetCreatureByID(ctx context.Context, db *pgxpool.Pool, creatureID string) (entities.Creatures, error) {
 	var creature entities.Creatures
 	err := pgxscan.Get(ctx, db, &creature, `SELECT * FROM creatures where id = $1`, creatureID)
 	if err != nil {

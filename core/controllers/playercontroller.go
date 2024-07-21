@@ -35,7 +35,7 @@ func GetOnePlayer(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -48,7 +48,7 @@ func GetPlayerStats(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -67,7 +67,7 @@ func GetPlayerEquipment(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -86,7 +86,7 @@ func GetPlayerInventory(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -105,7 +105,7 @@ func GetPlayerPets(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -124,7 +124,7 @@ func GetPlayerGuild(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -143,7 +143,7 @@ func GetPlayerSkill(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -234,7 +234,7 @@ func AddItemToPlayerInventory(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -304,7 +304,7 @@ func AddPetToPlayer(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -368,7 +368,7 @@ func AddSkillToPlayer(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -424,7 +424,7 @@ func UpdatePlayerStats(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -480,7 +480,7 @@ func UpdatePlayer(c *gin.Context) {
 		return
 	}
 
-	selectedPlayer, err := repository.GetPlayerById(ctx, db, id)
+	selectedPlayer, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -510,7 +510,7 @@ func UpdatePlayerLocation(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -548,7 +548,7 @@ func UpdatePlayerEquipment(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -648,7 +648,7 @@ func UpdatePlayerInventory(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -686,7 +686,7 @@ func UpdatePlayerPets(c *gin.Context) {
 		return
 	}
 	// check if player exist
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -749,7 +749,7 @@ func UpdatePlayerSkills(c *gin.Context) {
 		return
 	}
 	// check if player exist
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -801,7 +801,7 @@ func DeletePlayer(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 	// check if player exist
-	player, err := repository.GetPlayerById(ctx, db, id)
+	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return

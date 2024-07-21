@@ -34,7 +34,7 @@ func GetOneCreature(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	creature, err := repository.GetCreatureById(ctx, db, id)
+	creature, err := repository.GetCreatureByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -48,7 +48,7 @@ func GetCreatureSpawn(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	creature, err := repository.GetCreatureById(ctx, db, id)
+	creature, err := repository.GetCreatureByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -69,7 +69,7 @@ func GetCreatureSkill(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	creature, err := repository.GetCreatureById(ctx, db, id)
+	creature, err := repository.GetCreatureByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -132,7 +132,7 @@ func AddCreatureSpawn(c *gin.Context) {
 		return
 	}
 
-	creature, err := repository.GetCreatureById(ctx, db, id)
+	creature, err := repository.GetCreatureByID(ctx, db, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -172,7 +172,7 @@ func AddCreatureSkill(c *gin.Context) {
 		return
 	}
 
-	creature, err := repository.GetCreatureById(ctx, db, id)
+	creature, err := repository.GetCreatureByID(ctx, db, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
