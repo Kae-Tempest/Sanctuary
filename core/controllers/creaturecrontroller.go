@@ -420,7 +420,31 @@ func DeleteCreatureSpawn(c *gin.Context) {
 	c.Done()
 }
 func DeleteCreatureSkill(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
 
+	var creatureSkillForm int
+	if err := c.ShouldBindBodyWithJSON(&creatureSkillForm); err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	// check if creature exist
+	creature, err := repository.GetCreatureByID(ctx, db, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	// delete creature spawn
+	_, deleteErr := db.Exec(ctx, `DELETE FROM creature_skill WHERE creature_id = $1 and skill_id = $2`, creature.ID, creatureSkillForm)
+	if deleteErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.Status(http.StatusOK)
+	c.Done()
 }
 func DeleteCreatureLoot(c *gin.Context) {
 
