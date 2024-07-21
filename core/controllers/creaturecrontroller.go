@@ -208,6 +208,38 @@ func AddCreatureLoot(c *gin.Context) {
 // PATCH \\
 
 func UpdateCreature(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
+
+	var creatureUpdateForm entities.Creatures
+	if err := c.ShouldBindBodyWithJSON(&creatureUpdateForm); err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	creature, err := repository.GetCreatureByID(ctx, db, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, err = db.Exec(ctx, `UPDATE creatures set (name, is_pet, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, level, hp ) 
+    = ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) where id = $1`,
+		creature.ID, creatureUpdateForm.Name, creatureUpdateForm.IsPet, creatureUpdateForm.Strength, creatureUpdateForm.Mana, creatureUpdateForm.Stamina,
+		creatureUpdateForm.Dexterity, creatureUpdateForm.Intelligence, creatureUpdateForm.Wisdom, creatureUpdateForm.Level, creatureUpdateForm.HP)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	creature, err = repository.GetCreatureByID(ctx, db, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.JSON(http.StatusOK, &creature)
+	c.Done()
 
 }
 func UpdateCreatureSpawn(c *gin.Context) {
