@@ -339,7 +339,58 @@ func UpdateCreatureLoot(c *gin.Context) {
 // DELETE \\
 
 func DeleteCreature(c *gin.Context) {
+	db := database.Connect()
+	id := c.Param("id")
 
+	// check if creature exist
+	creature, err := repository.GetCreatureByID(ctx, db, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+	// delete creature skill
+	_, deleteErr := db.Exec(ctx, `DELETE FROM creature_skill WHERE creature_id = $1`, creature.ID)
+	if deleteErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+	// delete creature spawn
+	_, deleteErr = db.Exec(ctx, `DELETE FROM creaturespawn WHERE creature_id = $1`, creature.ID)
+	if deleteErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	if creature.IsPet {
+		// select pet
+		var selectedPets entities.PetsMounts
+		err := pgxscan.Get(ctx, db, &selectedPets, `SELECT * FROM pets_mounts where creature_id = $1`, creature.ID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+		// delete pets to all user
+		_, deleteErr = db.Exec(ctx, `DELETE FROM user_pets_mounts where pet_id = $1`, selectedPets.ID)
+		if deleteErr != nil {
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+		// delete pet
+		_, deleteErr = db.Exec(ctx, `DELETE FROM pets_mounts where creature_id = $1`, creature.ID)
+		if deleteErr != nil {
+			c.JSON(http.StatusBadRequest, "bad request")
+			return
+		}
+	}
+	// delete creature
+	_, deleteErr = db.Exec(ctx, `DELETE FROM creatures where id = $1`, creature.ID)
+	if deleteErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.Status(http.StatusOK)
+	c.Done()
 }
 func DeleteCreatureSpawn(c *gin.Context) {
 
