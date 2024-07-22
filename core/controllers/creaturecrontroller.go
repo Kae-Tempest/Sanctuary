@@ -7,6 +7,7 @@ import (
 	"sanctuary-api/database"
 	"sanctuary-api/entities"
 	"sanctuary-api/repository"
+	"strconv"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,6 @@ func GetAllCreatures(c *gin.Context) {
 	}
 	c.Done()
 }
-
 func GetOneCreature(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
@@ -43,7 +43,6 @@ func GetOneCreature(c *gin.Context) {
 	c.JSON(http.StatusOK, &creature)
 	c.Done()
 }
-
 func GetCreatureSpawn(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
@@ -64,7 +63,6 @@ func GetCreatureSpawn(c *gin.Context) {
 	c.JSON(http.StatusOK, &creatureSpawn)
 	c.Done()
 }
-
 func GetCreatureSkill(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
@@ -202,7 +200,7 @@ func AddCreatureSkill(c *gin.Context) {
 	c.Done()
 }
 func AddCreatureLoot(c *gin.Context) {
-
+	// TODO: TODO
 }
 
 // PATCH \\
@@ -260,7 +258,7 @@ func UpdateCreatureSpawn(c *gin.Context) {
 	}
 
 	// check if location exist
-	location, locationErr := repository.GetLocationByID(ctx, db, creatureSpawnForm.EmplacementID)
+	location, locationErr := repository.GetLocationByID(ctx, db, strconv.Itoa(creatureSpawnForm.EmplacementID))
 	if locationErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -307,7 +305,7 @@ func UpdateCreatureSkill(c *gin.Context) {
 	}
 
 	// check if skill exist
-	skill, skillErr := repository.GetSkillByID(ctx, db, creatureSkillForm.SkillID)
+	skill, skillErr := repository.GetSkillByID(ctx, db, strconv.Itoa(creatureSkillForm.SkillID))
 	if skillErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -333,7 +331,7 @@ func UpdateCreatureSkill(c *gin.Context) {
 	}
 }
 func UpdateCreatureLoot(c *gin.Context) {
-
+	// TODO : TODO
 }
 
 // DELETE \\
@@ -447,5 +445,5 @@ func DeleteCreatureSkill(c *gin.Context) {
 	c.Done()
 }
 func DeleteCreatureLoot(c *gin.Context) {
-
+	// TODO : TODO
 }
