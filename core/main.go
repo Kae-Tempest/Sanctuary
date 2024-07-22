@@ -77,6 +77,19 @@ func main() {
 	r.DELETE("/creature/:id/loot", controllers.DeleteCreatureLoot)
 
 	///             LOCATIONS             \\\
+	// GET \\
+	r.GET("/locations", controllers.GetLocations)
+	r.GET("/location/:id", controllers.GetLocationByID)
+	r.GET("/location/:id/players", controllers.GetPlayersByLocation)
+	r.GET("/location/:id/creatures", controllers.GetCreaturesByLocation)
+	r.GET("/location/:id/resources", controllers.GetResourcesByLocation)
+	// POST \\
+	r.POST("/location", controllers.CreateLocation)
+	// PATCH \\
+	r.PATCH("/location/:id", controllers.UpdateLocation)
+	//DELETE\\
+	r.DELETE("/location/:id", controllers.DeleteLocation)
+
 	///             ITEMS             \\\
 	///             QUEST             \\\
 	///             JOB             \\\
