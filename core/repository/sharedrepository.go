@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"sanctuary-api/entities"
@@ -27,22 +28,22 @@ func GetPlayerByEmail(ctx context.Context, db *pgxpool.Pool, playerEmail string)
 	return player, nil
 }
 
-func GetCreatureByID(ctx context.Context, db *pgxpool.Pool, creatureID string) (entities.Creatures, error) {
-	var creature entities.Creatures
-	err := pgxscan.Get(ctx, db, &creature, `SELECT * FROM creatures where id = $1`, creatureID)
+func GetCreatureByID(ctx context.Context, db *pgxpool.Pool, mobID string) (entities.Mob, error) {
+	var mob entities.Mob
+	err := pgxscan.Get(ctx, db, &mob, `SELECT * FROM mobs where id = $1`, mobID)
 	if err != nil {
-		return creature, err
+		return mob, err
 	}
-	return creature, nil
+	return mob, nil
 }
 
-func GetCreatureByName(ctx context.Context, db *pgxpool.Pool, creatureName string) (entities.Creatures, error) {
-	var creature entities.Creatures
-	err := pgxscan.Get(ctx, db, &creature, `SELECT * FROM creatures where name = $1`, creatureName)
+func GetCreatureByName(ctx context.Context, db *pgxpool.Pool, mobName string) (entities.Mob, error) {
+	var mob entities.Mob
+	err := pgxscan.Get(ctx, db, &mob, `SELECT * FROM mobs where name = $1`, mobName)
 	if err != nil {
-		return creature, err
+		return mob, err
 	}
-	return creature, nil
+	return mob, nil
 }
 
 func GetLocationByID(ctx context.Context, db *pgxpool.Pool, locationID string) (entities.Locations, error) {
@@ -81,13 +82,13 @@ func GetPlayersByLocation(ctx context.Context, db *pgxpool.Pool, locationID stri
 	return players, nil
 }
 
-func GetCreaturesByLocation(ctx context.Context, db *pgxpool.Pool, locationID string) ([]entities.Creatures, error) {
-	var creatures []entities.Creatures
-	err := pgxscan.Select(ctx, db, &creatures, `SELECT * FROM creatures c join creaturespawn cp on c.id = cp.creature_id where emplacement_id = $1`, locationID)
+func GetCreaturesByLocation(ctx context.Context, db *pgxpool.Pool, locationID string) ([]entities.Mob, error) {
+	var mobs []entities.Mob
+	err := pgxscan.Select(ctx, db, &mobs, `SELECT * FROM mobs c join mob_spawn cp on c.id = cp.mob_id where location_id = $1`, locationID)
 	if err != nil {
-		return creatures, err
+		return mobs, err
 	}
-	return creatures, nil
+	return mobs, nil
 }
 
 func UpdatePlayersLocation(ctx context.Context, db *pgxpool.Pool, locationID int, players []entities.Player) error {
@@ -100,9 +101,9 @@ func UpdatePlayersLocation(ctx context.Context, db *pgxpool.Pool, locationID int
 	return nil
 }
 
-func UpdateCreaturesLocation(ctx context.Context, db *pgxpool.Pool, locationID int, creatures []entities.Creatures) error {
-	for _, creature := range creatures {
-		_, err := db.Exec(ctx, `UPDATE creaturespawn SET emplacement_id = $2 where creature_id = $1`, creature.ID, locationID)
+func UpdateCreaturesLocation(ctx context.Context, db *pgxpool.Pool, locationID int, mobs []entities.Mob) error {
+	for _, mob := range mobs {
+		_, err := db.Exec(ctx, `UPDATE creaturespawn SET emplacement_id = $2 where creature_id = $1`, mob.ID, locationID)
 		if err != nil {
 			return err
 		}
@@ -140,8 +141,36 @@ func GetItemsByType(ctx context.Context, db *pgxpool.Pool, itemType string) ([]e
 	return items, nil
 }
 
-func GetPlayersWithItem(ctx context.Context, db *pgxpool.Pool, itemName string) ([]entities.Player, error) {
+func GetCompleteItem(ctx context.Context, db *pgxpool.Pool, itemID int) (entities.ItemComplete, error) {
+	var item entities.ItemComplete
+	err := pgxscan.Get(ctx, db, &item, `SELECT * FROM items i join item_stats is on i.id = is.item_id where id = $1`, itemID)
+	if err != nil {
+		return item, nil
+	}
+
+	return item, nil
+}
+
+func GetItemStat(ctx context.Context, db *pgxpool.Pool, itemID int) (entities.ItemStat, error) {
+	var item entities.ItemStat
+	err := pgxscan.Get(ctx, db, &item, `SELECT * FROM item_stats where item_id = $1`, itemID)
+	if err != nil {
+		return item, nil
+	}
+
+	return item, nil
+}
+
+func GetPlayersWithItem(ctx context.Context, db *pgxpool.Pool, itemID int) ([]entities.Player, error) {
 	var players []entities.Player
+	err := pgxscan.Select(ctx, db, &players, `SELECT p.*FROM players p join inventory i on p.id = i.player_id where item_id = $1 UNION
+SELECT p.*  FROM players p JOIN equipment e on p.id = e.player_id
+WHERE e.helmet = $1 OR e.chestplate = $1 OR e.leggings = $1 OR e.boots = $1 OR e.mainhand = $1 OR e.offhand = $1
+OR e.accessory_slot_0 = $1 OR e.accessory_slot_1 = $1 OR e.accessory_slot_2 = $1 OR e.accessory_slot_3 = $1;`, itemID)
+	if err != nil {
+		return players, err
+	}
+	fmt.Println(players)
 	return players, nil
 }
 
@@ -152,5 +181,9 @@ func GetPlayerInventoryByID(ctx context.Context, db *pgxpool.Pool, playerID int)
 
 func GetPlayerEquipmentByID(ctx context.Context, db *pgxpool.Pool, playerID int) (entities.Equipment, error) {
 	var equipment entities.Equipment
+	err := pgxscan.Get(ctx, db, &equipment, `SELECT * FROM equipment where player_id = $1`, playerID)
+	if err != nil {
+		return equipment, err
+	}
 	return equipment, nil
 }

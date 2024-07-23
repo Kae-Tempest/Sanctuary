@@ -1,6 +1,9 @@
 package entities
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type Equipment struct {
 	PlayerId       int `json:"player_id"`
@@ -172,18 +175,18 @@ type PlayerSkill struct {
 }
 
 type Player struct {
-	ID            int    `json:"id"`
-	UserID        int    `json:"userID"`
-	Email         string `json:"email"`
-	Username      string `json:"username"`
-	RaceID        int    `json:"race_id"`
-	JobID         int    `json:"job_id"`
-	Exp           int    `json:"exp"`
-	Po            int    `json:"po"`
-	Level         int    `json:"level"`
-	GuildID       int    `json:"guild_id"` // 0 = no guild
-	InventorySize int    `json:"inventorySize"`
-	LocationId    int    `json:"locationId"`
+	ID            int           `json:"id"`
+	UserID        sql.Null[int] `json:"userID"`
+	Email         string        `json:"email"`
+	Username      string        `json:"username"`
+	RaceID        int           `json:"race_id"`
+	JobID         int           `json:"job_id"`
+	Exp           int           `json:"exp"`
+	Po            int           `json:"po"`
+	Level         int           `json:"level"`
+	GuildID       int           `json:"guild_id"` // 0 = no guild
+	InventorySize int           `json:"inventorySize"`
+	LocationId    int           `json:"locationId"`
 }
 
 type PlayerAction struct {
@@ -218,11 +221,11 @@ type Objectives struct {
 type Race struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
-	Description string `json:"description"` // description of the race
-	Mana        int    `json:"mana"`
-	Stamina     int    `json:"stamina"`
-	Wisdom      int    `json:"wisdom"`
-	Charisma    int    `json:"charisma"`
+	Description string `json:"description,omitempty"` // description of the race
+	Mana        int    `json:"mana,omitempty"`
+	Stamina     int    `json:"stamina,omitempty"`
+	Wisdom      int    `json:"wisdom,omitempty"`
+	Charisma    int    `json:"charisma,omitempty"`
 }
 
 type Resources struct {
