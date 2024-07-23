@@ -1,13 +1,3 @@
-create sequence compagnies_id_seq
-    as integer;
-
-alter sequence compagnies_id_seq owner to postgres;
-
-create sequence ressources_id_seq
-    as integer;
-
-alter sequence ressources_id_seq owner to postgres;
-
 create table races
 (
     id          serial
@@ -46,21 +36,12 @@ alter table jobs
 
 create table items
 (
-    id                serial
+    id          serial
         constraint items_pk
             primary key,
-    name              varchar(255),
-    description       text,
-    type              integer,
-    strength          integer,
-    constitution      integer,
-    mana              integer,
-    stamina           integer,
-    dexterity         integer,
-    intelligence      integer,
-    wisdom            integer,
-    charisma          integer,
-    enchantment_level integer
+    name        varchar(255),
+    description text,
+    type        integer
 );
 
 alter table items
@@ -78,24 +59,14 @@ create table guilds
 alter table guilds
     owner to postgres;
 
-alter sequence compagnies_id_seq owned by guilds.id;
-
 create table skills
 (
-    id           serial
+    id          serial
         constraint skills_pk
             primary key,
-    name         varchar(100),
-    description  text,
-    strength     integer,
-    constitution integer,
-    mana         integer,
-    stamina      integer,
-    dexterity    integer,
-    intelligence integer,
-    wisdom       integer,
-    charisma     integer,
-    type         varchar
+    name        varchar(100),
+    description text,
+    type        varchar
 );
 
 alter table skills
@@ -117,9 +88,9 @@ create table quests
 alter table quests
     owner to postgres;
 
-create table creatures
+create table mobs
 (
-    id           serial
+    id           integer default nextval('creatures_id_seq'::regclass) not null
         constraint creatures_pk
             primary key,
     name         varchar(50),
@@ -136,14 +107,14 @@ create table creatures
     hp           integer
 );
 
-alter table creatures
+alter table mobs
     owner to postgres;
 
 create table pets_mounts
 (
-    creature_id  integer
-        constraint pets_mounts_creatures_id_fk
-            references creatures,
+    mob_id       integer
+        constraint pets_mounts_mobs_id_fk
+            references mobs,
     is_mountable boolean,
     speed        integer,
     id           serial
@@ -160,7 +131,7 @@ create table locations
         constraint locations_pk
             primary key,
     name       varchar(50),
-    is__safety boolean,
+    is_safety  boolean,
     difficulty integer,
     type       integer,
     size       integer
@@ -191,7 +162,8 @@ create table players
     po             bigint,
     location_id    integer
         constraint players_locations_id_fk
-            references locations
+            references locations,
+    user_id        integer
 );
 
 alter table players
@@ -221,7 +193,7 @@ create table guilds_members
     guilds_id integer
         constraint guilds_members_guildss_id_fk
             references guilds,
-    user_id   integer
+    player_id integer
         constraint guilds_members_players_id_fk
             references players
 );
@@ -231,19 +203,19 @@ alter table guilds_members
 
 create table equipment
 (
-    player_id  integer
+    player_id        integer
         constraint equipment_players_id_fk
             references players,
-    helmet     integer,
-    chestplate integer,
-    leggings   integer,
-    boots      integer,
-    mainhand   integer,
-    offhand    integer,
-    accesory_0 integer,
-    accesory_1 integer,
-    accesory_2 integer,
-    accesory_3 integer
+    helmet           integer,
+    chestplate       integer,
+    leggings         integer,
+    boots            integer,
+    mainhand         integer,
+    offhand          integer,
+    accessory_slot_0 integer,
+    accessory_slot_1 integer,
+    accessory_slot_2 integer,
+    accessory_slot_3 integer
 );
 
 alter table equipment
@@ -290,7 +262,7 @@ create table summons_beats
 alter table summons_beats
     owner to postgres;
 
-create table user_pets_mounts
+create table player_pets_mounts
 (
     pet_id    integer
         constraint user_pets_mounts_pets_mounts_id_fk
@@ -300,7 +272,7 @@ create table user_pets_mounts
             references players
 );
 
-alter table user_pets_mounts
+alter table player_pets_mounts
     owner to postgres;
 
 create table players_actions
@@ -333,7 +305,7 @@ create table resources
         constraint ressources_pk
             primary key,
     name               varchar(50),
-    emplacement_id     integer
+    location_id        integer
         constraint ressources_locations_id_fk
             references locations,
     ressources_type_id integer
@@ -345,37 +317,35 @@ create table resources
 alter table resources
     owner to postgres;
 
-alter sequence ressources_id_seq owned by resources.id;
-
-create table ressourceinventory
+create table ressource_inventory
 (
-    user_id  integer
-        constraint ressourceinventory_players_id_fk
+    player_id integer
+        constraint ressource_inventory_players_id_fk
             references players,
-    item_id  integer
-        constraint ressourceinventory_pk
+    item_id   integer
+        constraint ressource_inventory_pk
             unique
-        constraint ressourceinventory_resources_id_fk
+        constraint ressource_inventory_resources_id_fk
             references resources,
-    quantity integer
+    quantity  integer
 );
 
-alter table ressourceinventory
+alter table ressource_inventory
     owner to postgres;
 
-create table creaturespawn
+create table mob_spawn
 (
-    creature_id    integer
-        constraint creaturespawn_creatures_id_fk
-            references creatures,
-    emplacement_id integer
-        constraint creaturespawn_locations_id_fk
+    mob_id         integer
+        constraint creature_spawn_mobs_id_fk
+            references mobs,
+    location_id    integer
+        constraint creature_spawn_locations_id_fk
             references locations,
     level_required integer,
     spawn_rate     double precision
 );
 
-alter table creaturespawn
+alter table mob_spawn
     owner to postgres;
 
 create table job_skill
@@ -399,7 +369,7 @@ create table job_skill
 alter table job_skill
     owner to postgres;
 
-create table user_skill
+create table player_skill
 (
     player_id integer
         constraint user_skill_players_id_fk
@@ -409,10 +379,10 @@ create table user_skill
             references skills
 );
 
-alter table user_skill
+alter table player_skill
     owner to postgres;
 
-create table user_job_skill
+create table player_job_skill
 (
     player_id    integer
         constraint user_job_skill_players_id_fk
@@ -422,32 +392,92 @@ create table user_job_skill
             references job_skill
 );
 
-alter table user_job_skill
+alter table player_job_skill
     owner to postgres;
 
-create table creature_skill
+create table mob_skill
 (
-    creature_id integer
-        constraint creature_skill_creatures_id_fk
-            references creatures,
-    skill_id    integer
+    mob_id   integer
+        constraint creature_skill_mobs_id_fk
+            references mobs,
+    skill_id integer
         constraint creature_skill_skills_id_fk
             references skills
 );
 
-alter table creature_skill
+alter table mob_skill
     owner to postgres;
 
 create table hunt_action
 (
-    player_id  integer
+    player_id   integer
         constraint hunt_action_players_id_fk
             references players,
-    btn_id     varchar(20),
-    message_id varchar,
-    channel_id varchar
+    location_id integer
+        constraint hunt_action_locations_id_fk
+            references locations,
+    mob_id      integer
+        constraint hunt_action_mobs_id_fk
+            references mobs,
+    start_at    timestamp,
+    end_at      timestamp
 );
 
 alter table hunt_action
+    owner to postgres;
+
+create table item_stats
+(
+    item_id           integer
+        constraint item_stats_items_id_fk
+            references items,
+    strength          integer,
+    constitution      integer,
+    mana              integer,
+    stamina           integer,
+    dexterity         integer,
+    intelligence      integer,
+    wisdom            integer,
+    charisma          integer,
+    enchantment_level integer
+);
+
+alter table item_stats
+    owner to postgres;
+
+create table skill_stats
+(
+    skill_id     integer
+        constraint skill_stat_skills_id_fk
+            references skills,
+    strength     integer,
+    constitution integer,
+    mana         integer,
+    stamina      integer,
+    dexterity    integer,
+    intelligence integer,
+    wisdom       integer,
+    charisma     integer
+);
+
+alter table skill_stats
+    owner to postgres;
+
+create table loots
+(
+    id           integer not null
+        constraint loots_pk
+            primary key,
+    mob_id       integer
+        constraint loots_mobs_id_fk
+            references mobs,
+    item_id      integer
+        constraint loots_items_id_fk
+            references items,
+    quantity_max integer,
+    rarity       integer
+);
+
+alter table loots
     owner to postgres;
 
