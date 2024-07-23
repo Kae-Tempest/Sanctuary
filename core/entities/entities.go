@@ -64,6 +64,16 @@ type ItemStat struct {
 	EnchantmentLevel int `json:"enchantmentLevel"`
 }
 
+type ItemEmplacement struct {
+	ItemID      int    `json:"itemID"`
+	Emplacement string `json:"emplacement"`
+}
+
+type ItemComplete struct {
+	Item  Items
+	Stats ItemStat
+}
+
 type JobSkill struct {
 	ID           int    `json:"id"`
 	JobID        int    `json:"jobID"`
