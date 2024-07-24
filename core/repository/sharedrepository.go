@@ -111,9 +111,9 @@ func UpdateCreaturesLocation(ctx context.Context, db *pgxpool.Pool, locationID i
 	return nil
 }
 
-func GetItemByID(ctx context.Context, db *pgxpool.Pool, itemID string) (entities.Items, error) {
-	var item entities.Items
-	err := pgxscan.Get(ctx, db, &item, `SELECT * FROM items where id = $1`, itemID)
+func GetItemByID(ctx context.Context, db *pgxpool.Pool, itemID string) (entities.ItemComplete, error) {
+	var item entities.ItemComplete
+	err := pgxscan.Get(ctx, db, &item, `SELECT * FROM items join item_stats on items.id = item_stats.item_id where id = $1`, itemID)
 	if err != nil {
 		return item, nil
 	}
@@ -176,6 +176,10 @@ OR e.accessory_slot_0 = $1 OR e.accessory_slot_1 = $1 OR e.accessory_slot_2 = $1
 
 func GetPlayerInventoryByID(ctx context.Context, db *pgxpool.Pool, playerID int) ([]entities.Inventory, error) {
 	var inventory []entities.Inventory
+	err := pgxscan.Select(ctx, db, &inventory, `SELECT * FROM inventory where player_id = $1`, playerID)
+	if err != nil {
+		return inventory, nil
+	}
 	return inventory, nil
 }
 

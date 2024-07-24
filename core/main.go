@@ -35,7 +35,7 @@ func main() {
 	r.GET("/player/:id/guild", controllers.GetPlayerGuild)
 	r.GET("/player/:id/skill", controllers.GetPlayerSkill)
 	// POST \\
-	r.POST("player/create", controllers.CreatePlayer)
+	r.POST("/player/create", controllers.CreatePlayer)
 	r.POST("/player/:id/inventory", controllers.AddItemToPlayerInventory)
 	r.POST("/player/:id/pets", controllers.AddPetToPlayer)
 	r.POST("/player/:id/skill", controllers.AddSkillToPlayer)
@@ -56,32 +56,32 @@ func main() {
 	///             CREATURE             \\\
 
 	// GET \\
-	r.GET("/creatures", controllers.GetAllCreatures)
-	r.GET("/creature/:id", controllers.GetOneCreature)
-	r.GET("/creature/:id/spawn", controllers.GetCreatureSpawn)
-	r.GET("/creature/:id/skill", controllers.GetCreatureSkill)
+	r.GET("/mobs", controllers.GetAllMobs)
+	r.GET("/mob/:id", controllers.GetOneMob)
+	r.GET("/mob/:id/spawn", controllers.GetMobSpawn)
+	r.GET("/mob/:id/skill", controllers.GetMobSkill)
 	// POST \\
-	r.POST("/creature/create", controllers.CreateCreature)
-	r.POST("/creature/spawn", controllers.AddCreatureSpawn)
-	r.POST("/creature/skill", controllers.AddCreatureSkill)
-	r.POST("/creature/loot", controllers.AddCreatureLoot)
+	r.POST("/mob/create", controllers.CreateMob)
+	r.POST("/mob/spawn", controllers.AddMobSpawn)
+	r.POST("/mob/skill", controllers.AddMobSkill)
+	r.POST("/mob/loot", controllers.AddMobLoot)
 	// PATCH \\
-	r.PATCH("/creature/:id", controllers.UpdateCreature)
-	r.PATCH("/creature/:id/spawn", controllers.UpdateCreatureSpawn)
-	r.PATCH("/creature/:id/skill", controllers.UpdateCreatureSkill)
-	r.PATCH("/creature/:id/loot", controllers.UpdateCreatureLoot)
+	r.PATCH("/mob/:id", controllers.UpdateMob)
+	r.PATCH("/mob/:id/spawn", controllers.UpdateMobSpawn)
+	r.PATCH("/mob/:id/skill", controllers.UpdateMobSkill)
+	r.PATCH("/mob/:id/loot", controllers.UpdateMobLoot)
 	//DELETE\\
-	r.DELETE("/creature/:id", controllers.DeleteCreature)
-	r.DELETE("/creature/:id/spawn", controllers.DeleteCreatureSpawn)
-	r.DELETE("/creature/:id/skill", controllers.DeleteCreatureSkill)
-	r.DELETE("/creature/:id/loot", controllers.DeleteCreatureLoot)
+	r.DELETE("/mob/:id", controllers.DeleteMob)
+	r.DELETE("/mob/:id/spawn", controllers.DeleteMobSpawn)
+	r.DELETE("/mob/:id/skill", controllers.DeleteMobSkill)
+	r.DELETE("/mob/:id/loot", controllers.DeleteMobLoot)
 
 	///             LOCATIONS             \\\
 	// GET \\
 	r.GET("/locations", controllers.GetLocations)
 	r.GET("/location/:id", controllers.GetLocationByID)
 	r.GET("/location/:id/players", controllers.GetPlayersByLocation)
-	r.GET("/location/:id/creatures", controllers.GetCreaturesByLocation)
+	r.GET("/location/:id/mobs", controllers.GetCreaturesByLocation)
 	r.GET("/location/:id/resources", controllers.GetResourcesByLocation)
 	// POST \\
 	r.POST("/location", controllers.CreateLocation)
@@ -91,6 +91,18 @@ func main() {
 	r.DELETE("/location/:id", controllers.DeleteLocation)
 
 	///             ITEMS             \\\
+	// GET \\
+	r.GET("/items", controllers.GetItems)
+	r.GET("/item/:id", controllers.GetItemByID)
+	r.GET("items/:type", controllers.GetItemByType)
+	// POST \\
+	r.POST("/item", controllers.CreateItem)
+	// PATCH \\
+	r.PATCH("/item/:id", controllers.UpdateItem)
+	r.PATCH("/item/:id/stat", controllers.UpdateItemStat)
+	//DELETE\\
+	r.DELETE("/item/:id", controllers.DeleteItem)
+	///              EQUIPMENT             \\\
 	///             QUEST             \\\
 	///             JOB             \\\
 	///             RACE             \\\
@@ -98,6 +110,7 @@ func main() {
 	///             ACTION             \\\
 	///             GUILD             \\\
 	///             SKILL             \\\
+	///				LOOT			\\\
 
 	err = r.Run()
 	if err != nil {

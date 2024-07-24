@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"sanctuary-api/database"
 	"sanctuary-api/entities"
@@ -111,8 +112,8 @@ func GetPlayerPets(c *gin.Context) {
 		return
 	}
 
-	var playerPets []entities.UserPet
-	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM user_pets_mounts where player_id = $1`, player.ID)
+	var playerPets []entities.PlayerPet
+	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM player_pets_mounts where player_id = $1`, player.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -131,7 +132,7 @@ func GetPlayerGuild(c *gin.Context) {
 	}
 
 	var playerGuild entities.Guild
-	err = pgxscan.Get(ctx, db, &playerGuild, `SELECT * FROM guilds g join guilds_members gm on g.id = gm.guilds_id where gm.user_id = $1`, player.ID)
+	err = pgxscan.Get(ctx, db, &playerGuild, `SELECT * FROM guilds g join guilds_members gm on g.id = gm.guilds_id where gm.player_id = $1`, player.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -150,7 +151,7 @@ func GetPlayerSkill(c *gin.Context) {
 	}
 
 	var playerSkill []entities.Skill
-	err = pgxscan.Select(ctx, db, &playerSkill, `SELECT * from user_skill where player_id = $1`, player.ID)
+	err = pgxscan.Select(ctx, db, &playerSkill, `SELECT * from player_skill where player_id = $1`, player.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -164,49 +165,57 @@ func CreatePlayer(c *gin.Context) {
 	db := database.Connect()
 	var playerForm entities.Player
 	if err := c.ShouldBindBodyWithJSON(&playerForm); err != nil {
-		c.String(http.StatusBadRequest, "bad request")
+		c.String(http.StatusBadRequest, "bad request during bind JSON")
 		return
 	}
 
 	existingPlayer, epErr := repository.GetPlayerByEmail(ctx, db, playerForm.Email)
-	if errors.Is(epErr, pgx.ErrNoRows) {
-		c.JSON(http.StatusConflict, &existingPlayer)
+	if errors.Is(pgx.ErrNoRows, epErr) {
+		c.JSON(http.StatusConflict, "existing player"+epErr.Error())
+		fmt.Println(existingPlayer)
 	}
 	if epErr != nil && !errors.Is(epErr, pgx.ErrNoRows) {
 		c.String(http.StatusBadRequest, "bad request")
 	}
 
-	_, err := db.Exec(ctx, `INSERT INTO players (email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id) values ($1, $2, $3, $4, 0, 1, 0, 10, 50, 1)`,
+	_, err := db.Exec(ctx, `INSERT INTO players (email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id, user_id) values ($1, $2, $3, $4, 0, 1, 0, 10, 50, 1, null)`,
 		playerForm.Email, playerForm.Username, playerForm.RaceID, playerForm.JobID)
 	if err != nil {
-		c.String(http.StatusBadRequest, "bad request")
+		c.String(http.StatusBadRequest, "bad request during inserting data"+err.Error())
 		return
 	}
 	var playerID int
-	err = pgxscan.Select(ctx, db, playerID, `SELECT id from players where email = $1`, playerForm.Email)
+	err = pgxscan.Get(ctx, db, &playerID, `SELECT id from players where email = $1`, playerForm.Email)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "bad request")
+		c.JSON(http.StatusBadRequest, "bad request during get PlayerID"+err.Error())
 		return
 	}
 	// Get Job Stats
 	var playerJob entities.Job
 	err = pgxscan.Get(ctx, db, &playerJob, `SELECT * from jobs where id = $1`, playerForm.JobID)
 	if err != nil {
-		c.String(http.StatusBadRequest, "bad request")
+		c.String(http.StatusBadRequest, "bad request during get Job"+err.Error())
 		return
 	}
 	// Get Race Stats
 	var playerRace entities.Race
 	err = pgxscan.Get(ctx, db, &playerRace, `SELECT * from races where id = $1`, playerForm.RaceID)
 	if err != nil {
-		c.String(http.StatusBadRequest, "bad request")
+		c.String(http.StatusBadRequest, "bad request during get Race"+err.Error())
 		return
 	}
 	// Create Player Stats
 	_, err = db.Exec(ctx, `INSERT INTO stats (player_id, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, hp) values ($1, $2, $3, $4,$5,$6,$7,$8,$9,20)`,
 		playerID, playerJob.Strength, playerJob.Constitution, playerRace.Mana, playerRace.Stamina, playerJob.Dexterity, playerJob.Intelligence, playerRace.Wisdom, playerRace.Charisma)
 	if err != nil {
-		c.String(http.StatusBadRequest, "bad request")
+		c.String(http.StatusBadRequest, "bad request during insert Stat"+err.Error())
+		return
+	}
+
+	_, err = db.Exec(ctx, `INSERT INTO equipment (player_id, helmet, chestplate, leggings, boots, mainhand, offhand, accessory_slot_0, accessory_slot_1, accessory_slot_2, accessory_slot_3) VALUES 
+    ($1,0,0,0,0,0,0,0,0,0,0)`, playerID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request during insert equipment"+err.Error())
 		return
 	}
 
@@ -310,15 +319,15 @@ func AddPetToPlayer(c *gin.Context) {
 		return
 	}
 
-	var playerPets []entities.UserPet
-	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM user_pets_mounts where player_id = $1`, player.ID)
+	var playerPets []entities.PlayerPet
+	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM player_pets_mounts where player_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
 	if len(playerPets) <= 0 {
-		_, err = db.Exec(ctx, `INSERT into user_pets_mounts (player_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
+		_, err = db.Exec(ctx, `INSERT into player_pets_mounts (player_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -340,7 +349,7 @@ func AddPetToPlayer(c *gin.Context) {
 	if havePet {
 		c.JSON(http.StatusBadRequest, "User already have this pet")
 	} else {
-		_, err = db.Exec(ctx, `INSERT into user_pets_mounts (player_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
+		_, err = db.Exec(ctx, `INSERT into player_pets_mounts (player_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -374,15 +383,15 @@ func AddSkillToPlayer(c *gin.Context) {
 		return
 	}
 
-	var playerSkills []entities.UserSkill
-	err = pgxscan.Select(ctx, db, &playerSkills, `SELECT skill_id FROM user_skill where player_id = $1`, player.ID)
+	var playerSkills []entities.PlayerSkill
+	err = pgxscan.Select(ctx, db, &playerSkills, `SELECT skill_id FROM player_skill where player_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
 	if len(playerSkills) <= 0 {
-		_, err = db.Exec(ctx, `INSERT into user_skill (player_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
+		_, err = db.Exec(ctx, `INSERT into player_skill (player_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -404,7 +413,7 @@ func AddSkillToPlayer(c *gin.Context) {
 	if haveSkill {
 		c.JSON(http.StatusBadRequest, "User already have this skill")
 	} else {
-		_, err = db.Exec(ctx, `INSERT into user_skill (player_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
+		_, err = db.Exec(ctx, `INSERT into player_skill (player_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -608,17 +617,17 @@ func UpdatePlayerEquipment(c *gin.Context) {
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory1") {
 			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot1, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_2", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_1", db, c)
 	case "AccessorySlot2":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory2") {
 			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot2, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_3", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_2", db, c)
 	case "AccessorySlot3":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory3") {
 			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot3, playerEquipments.PlayerId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_4", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_3", db, c)
 	default:
 		break
 	}
@@ -699,10 +708,10 @@ func UpdatePlayerPets(c *gin.Context) {
 		return
 	}
 	// check if player already have this pet
-	var playerPets entities.UserPet
-	err = pgxscan.Get(ctx, db, &playerPets, `SELECT pet_id FROM user_pets_mounts where pet_id = $1`, playerPetForm.PetsID)
+	var playerPets entities.PlayerPet
+	err = pgxscan.Get(ctx, db, &playerPets, `SELECT pet_id FROM player_pets_mounts where pet_id = $1`, playerPetForm.PetsID)
 	if errors.Is(err, pgx.ErrNoRows) {
-		_, insertErr := db.Exec(ctx, `INSERT INTO user_pets_mounts (pet_id, player_id) values ($1,$2)`, playerPetForm.PetsID, player.ID)
+		_, insertErr := db.Exec(ctx, `INSERT INTO player_pets_mounts (pet_id, player_id) values ($1,$2)`, playerPetForm.PetsID, player.ID)
 		if insertErr != nil {
 			c.String(http.StatusBadRequest, "bad request inserting user's pets")
 			return
@@ -715,15 +724,15 @@ func UpdatePlayerPets(c *gin.Context) {
 		return
 	}
 	if playerPets.PetID != 0 {
-		var creature entities.Creatures
-		err = pgxscan.Get(ctx, db, &creature, `SELECT name from creatures where id = $1`, selectedPet.CreatureID)
+		var mob entities.Mob
+		err = pgxscan.Get(ctx, db, &mob, `SELECT name from mobs where id = $1`, selectedPet.MobID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
 
 		var petScroll entities.Items
-		err = pgxscan.Get(ctx, db, &petScroll, `SELECT * FROM items where name like '%$1%'`, creature.Name)
+		err = pgxscan.Get(ctx, db, &petScroll, `SELECT * FROM items where name like '%$1%'`, mob.Name)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -762,10 +771,10 @@ func UpdatePlayerSkills(c *gin.Context) {
 		return
 	}
 	// check if player already have this pet
-	var playerSkills entities.UserSkill
-	err = pgxscan.Get(ctx, db, &playerSkills, `SELECT skill_id FROM user_skill where skill_id = $1`, playerSkillForm.SkillID)
+	var playerSkills entities.PlayerSkill
+	err = pgxscan.Get(ctx, db, &playerSkills, `SELECT skill_id FROM player_skill where skill_id = $1`, playerSkillForm.SkillID)
 	if errors.Is(err, pgx.ErrNoRows) {
-		_, insertErr := db.Exec(ctx, `INSERT INTO user_skill (skill_id, player_id) values ($1,$2)`, playerSkillForm.SkillID, player.ID)
+		_, insertErr := db.Exec(ctx, `INSERT INTO player_skill (skill_id, player_id) values ($1,$2)`, playerSkillForm.SkillID, player.ID)
 		if insertErr != nil {
 			c.String(http.StatusBadRequest, "bad request inserting user's skill")
 			return
@@ -803,18 +812,18 @@ func DeletePlayer(c *gin.Context) {
 	// check if player exist
 	player, err := repository.GetPlayerByID(ctx, db, id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "bad request")
+		c.JSON(http.StatusBadRequest, "bad request during getting Player"+err.Error())
 		return
 	}
 
 	// delete pets
-	_, err = db.Exec(ctx, `DELETE from user_pets_mounts  where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from player_pets_mounts  where player_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request deleting player's pets")
 		return
 	}
 	// delete skills
-	_, err = db.Exec(ctx, `DELETE from user_skill where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from player_skill where player_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad  request deleting player's skills")
 		return
