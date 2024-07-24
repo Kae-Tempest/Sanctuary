@@ -112,7 +112,7 @@ func main() {
 	///             SKILL             \\\
 	///				LOOT			\\\
 
-	err = r.Run()
+	err = r.Run(":8000")
 	if err != nil {
 		panic(err)
 	}

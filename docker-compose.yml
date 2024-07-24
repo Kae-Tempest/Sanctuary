@@ -1,0 +1,42 @@
+services:
+  go:
+    build:
+      context: ./core
+    container_name: api-go
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_URL="postgresql://db/sanctuary?user=postgres&password=root"
+    tty: true
+  react:
+    build:
+      context: ./src
+    container_name: front-react
+    ports:
+      - "5173:5173"
+    tty: true
+  db:
+    image: postgres:16-alpine
+    command: postgres -c config_file=/etc/postgresql.conf
+    shm_size: '4gb'
+    ulimits:
+      nofile:
+        soft: 98304
+        hard: 98304
+    ports:
+      - "6923:5432"
+    volumes:
+      - ./docker/postgresql/postgresql.conf:/etc/postgresql.conf
+      - ./data/postgresql:/var/lib/postgresql/data
+      - ./docker/postgresql/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./core/database/init-db.sql://docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'root'
+      POSTGRES_DB: 'sanctuary'
+      ALLOW_IP_RANGE: 0.0.0.0/0
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      timeout: 5s
+      retries: 300
