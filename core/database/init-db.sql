@@ -175,8 +175,6 @@ create table inventory
         constraint inventory_players_id_fk
             references players,
     item_id   integer
-        constraint inventory_pk
-            unique
         constraint inventory_items_id_fk
             references items,
     quantity  integer
@@ -479,5 +477,27 @@ create table loots
 );
 
 alter table loots
+    owner to postgres;
+
+create table item_emplacement
+(
+    item_id          integer
+        constraint item_emplacement_items_id_fk
+            references items,
+    item_emplacement varchar
+);
+
+alter table item_emplacement
+    owner to postgres;
+
+create table users
+(
+    email      varchar,
+    password   varchar,
+    created_at timestamp,
+    updated_at timestamp
+);
+
+alter table users
     owner to postgres;
 

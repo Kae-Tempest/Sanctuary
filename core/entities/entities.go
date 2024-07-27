@@ -286,3 +286,10 @@ type SummonBeast struct {
 	Wisdom       int    `json:"wisdom"`
 	Charisma     int    `json:"charisma"`
 }
+
+type User struct {
+	Email     string    `json:"email,omitempty"`
+	Password  string    `json:"password,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}

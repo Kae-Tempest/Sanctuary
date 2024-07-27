@@ -22,6 +22,13 @@ func main() {
 		})
 	})
 
+	///             USER             \\\
+	// GET \\
+	r.GET("/users", controllers.GetUsers)
+	r.GET("/user/:id", controllers.GetUserByID)
+	r.GET("/user/:email", controllers.GetUserByEmail)
+	// POST \\
+	r.POST("/register", controllers.Register)
 	///             PLAYER             \\\
 
 	// GET \\
