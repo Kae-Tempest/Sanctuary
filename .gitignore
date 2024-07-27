@@ -2,3 +2,4 @@ core/.env
 .idea
 src/node_modules
 data
+assets
