@@ -30,7 +30,6 @@ func GetAllPlayers(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{})
 	}
-	c.Done()
 }
 func GetOnePlayer(c *gin.Context) {
 	db := database.Connect()
@@ -43,7 +42,6 @@ func GetOnePlayer(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &player)
-	c.Done()
 }
 func GetPlayerStats(c *gin.Context) {
 	db := database.Connect()
@@ -62,7 +60,7 @@ func GetPlayerStats(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerStats)
-	c.Done()
+
 }
 func GetPlayerEquipment(c *gin.Context) {
 	db := database.Connect()
@@ -81,7 +79,7 @@ func GetPlayerEquipment(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerEquipment)
-	c.Done()
+
 }
 func GetPlayerInventory(c *gin.Context) {
 	db := database.Connect()
@@ -100,7 +98,7 @@ func GetPlayerInventory(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerInventory)
-	c.Done()
+
 }
 func GetPlayerPets(c *gin.Context) {
 	db := database.Connect()
@@ -119,7 +117,7 @@ func GetPlayerPets(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerPets)
-	c.Done()
+
 }
 func GetPlayerGuild(c *gin.Context) {
 	db := database.Connect()
@@ -138,7 +136,7 @@ func GetPlayerGuild(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerGuild)
-	c.Done()
+
 }
 func GetPlayerSkill(c *gin.Context) {
 	db := database.Connect()
@@ -157,7 +155,7 @@ func GetPlayerSkill(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerSkill)
-	c.Done()
+
 }
 
 // POST \\
@@ -220,7 +218,6 @@ func CreatePlayer(c *gin.Context) {
 	}
 
 	c.Status(http.StatusCreated)
-	c.Done()
 }
 func AddItemToPlayerInventory(c *gin.Context) {
 	type Body struct {
@@ -469,7 +466,6 @@ func UpdatePlayerStats(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &newPlayerStats)
-	c.Done()
 
 }
 func UpdatePlayer(c *gin.Context) {
@@ -539,7 +535,6 @@ func UpdatePlayerLocation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &player)
-	c.Done()
 
 }
 func UpdatePlayerEquipment(c *gin.Context) {
@@ -640,7 +635,6 @@ func UpdatePlayerEquipment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &newPlayerEquipment)
-	c.Done()
 }
 func UpdatePlayerInventory(c *gin.Context) {
 	db := database.Connect()
@@ -679,7 +673,6 @@ func UpdatePlayerInventory(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerInventory)
-	c.Done()
 }
 func UpdatePlayerPets(c *gin.Context) {
 	db := database.Connect()
@@ -717,7 +710,6 @@ func UpdatePlayerPets(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusOK, "New Pet Added")
-		c.Done()
 	}
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		c.String(http.StatusBadRequest, "bad request selecting user's pets")
@@ -741,7 +733,6 @@ func UpdatePlayerPets(c *gin.Context) {
 		repository.DoUpsertItemInInventory(ctx, petScroll.ID, player.ID, 1, db, c)
 
 		c.JSON(http.StatusOK, "You Already have this pet, you got his scroll")
-		c.Done()
 	}
 }
 func UpdatePlayerSkills(c *gin.Context) {
@@ -780,7 +771,6 @@ func UpdatePlayerSkills(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusOK, "New SKill Added")
-		c.Done()
 	}
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		c.String(http.StatusBadRequest, "bad request selecting user's skill")
@@ -799,7 +789,6 @@ func UpdatePlayerSkills(c *gin.Context) {
 		repository.DoUpsertItemInInventory(ctx, skillScroll.ID, player.ID, 1, db, c)
 
 		c.JSON(http.StatusOK, "You Already have this skill, you got his scroll")
-		c.Done()
 	}
 
 }

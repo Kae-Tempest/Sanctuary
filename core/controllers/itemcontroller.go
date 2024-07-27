@@ -23,7 +23,6 @@ func GetItems(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &items)
-	c.Done()
 }
 
 func GetItemByID(c *gin.Context) {
@@ -37,7 +36,6 @@ func GetItemByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &item)
-	c.Done()
 }
 
 func GetItemByType(c *gin.Context) {
@@ -51,7 +49,6 @@ func GetItemByType(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &items)
-	c.Done()
 }
 
 func CreateItem(c *gin.Context) {
@@ -88,7 +85,6 @@ func CreateItem(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusCreated, &completeItem)
-		c.Done()
 	}
 	if err != nil && !errors.Is(pgx.ErrNoRows, err) {
 		c.JSON(http.StatusBadRequest, "bad request")
@@ -96,7 +92,6 @@ func CreateItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusConflict, "already exist")
-	c.Done()
 }
 
 func UpdateItem(c *gin.Context) {
@@ -127,7 +122,6 @@ func UpdateItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &updatedItem)
-	c.Done()
 
 }
 
@@ -238,6 +232,5 @@ func DeleteItem(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-	c.Done()
 
 }

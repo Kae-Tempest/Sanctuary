@@ -21,7 +21,6 @@ func GetLocations(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &locations)
-	c.Done()
 }
 func GetLocationByID(c *gin.Context) {
 	db := database.Connect()
@@ -35,7 +34,7 @@ func GetLocationByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &location)
-	c.Done()
+
 }
 func GetPlayersByLocation(c *gin.Context) {
 	db := database.Connect()
@@ -48,7 +47,6 @@ func GetPlayersByLocation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &players)
-	c.Done()
 }
 func GetCreaturesByLocation(c *gin.Context) {
 	db := database.Connect()
@@ -61,7 +59,6 @@ func GetCreaturesByLocation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &creatures)
-	c.Done()
 }
 func GetResourcesByLocation(c *gin.Context) {
 	db := database.Connect()
@@ -75,7 +72,6 @@ func GetResourcesByLocation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &resources)
-	c.Done()
 }
 
 func CreateLocation(c *gin.Context) {
@@ -112,7 +108,7 @@ func CreateLocation(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusCreated, &newLocation)
-		c.Done()
+
 	}
 }
 
@@ -145,7 +141,6 @@ func UpdateLocation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &updateLocation)
-	c.Done()
 }
 
 func DeleteLocation(c *gin.Context) {
@@ -190,5 +185,4 @@ func DeleteLocation(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-	c.Done()
 }

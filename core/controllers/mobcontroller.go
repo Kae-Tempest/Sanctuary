@@ -28,7 +28,6 @@ func GetAllMobs(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{})
 	}
-	c.Done()
 }
 func GetOneMob(c *gin.Context) {
 	db := database.Connect()
@@ -41,7 +40,6 @@ func GetOneMob(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &mob)
-	c.Done()
 }
 func GetMobSpawn(c *gin.Context) {
 	db := database.Connect()
@@ -61,7 +59,6 @@ func GetMobSpawn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &creatureSpawn)
-	c.Done()
 }
 func GetMobSkill(c *gin.Context) {
 	db := database.Connect()
@@ -81,7 +78,6 @@ func GetMobSkill(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &creatureSkill)
-	c.Done()
 }
 
 // POST \\
@@ -118,7 +114,6 @@ func CreateMob(c *gin.Context) {
 	}
 	// return Creature
 	c.JSON(http.StatusCreated, &mob)
-	c.Done()
 
 }
 func AddMobSpawn(c *gin.Context) {
@@ -158,7 +153,6 @@ func AddMobSpawn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, &mobSpawn)
-	c.Done()
 
 }
 func AddMobSkill(c *gin.Context) {
@@ -197,7 +191,6 @@ func AddMobSkill(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, &mobSkill)
-	c.Done()
 }
 func AddMobLoot(c *gin.Context) {}
 
@@ -235,7 +228,6 @@ func UpdateMob(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &mob)
-	c.Done()
 
 }
 func UpdateMobSpawn(c *gin.Context) {
@@ -273,7 +265,6 @@ func UpdateMobSpawn(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, &mobSpawns)
-		c.Done()
 	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
@@ -321,7 +312,6 @@ func UpdateMobSkill(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, &mobSkill)
-		c.Done()
 	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
@@ -384,7 +374,6 @@ func DeleteMob(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-	c.Done()
 }
 func DeleteMobSpawn(c *gin.Context) {
 	db := database.Connect()
@@ -411,7 +400,6 @@ func DeleteMobSpawn(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-	c.Done()
 }
 func DeleteMobSkill(c *gin.Context) {
 	db := database.Connect()
@@ -438,6 +426,5 @@ func DeleteMobSkill(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-	c.Done()
 }
 func DeleteMobLoot(c *gin.Context) {}

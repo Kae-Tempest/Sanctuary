@@ -20,7 +20,6 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "ok",
 		})
-		c.Done()
 	})
 
 	///             PLAYER             \\\
