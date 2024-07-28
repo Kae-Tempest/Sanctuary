@@ -288,6 +288,7 @@ type SummonBeast struct {
 }
 
 type User struct {
+	ID        int       `json:"id,omitempty"`
 	Email     string    `json:"email,omitempty"`
 	Password  string    `json:"password,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`

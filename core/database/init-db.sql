@@ -49,7 +49,7 @@ alter table items
 
 create table guilds
 (
-    id    integer default nextval('compagnies_id_seq'::regclass) not null
+    id    serial
         constraint guild_pk
             primary key,
     name  varchar(32),
@@ -90,7 +90,7 @@ alter table quests
 
 create table mobs
 (
-    id           integer default nextval('creatures_id_seq'::regclass) not null
+    id           serial
         constraint creatures_pk
             primary key,
     name         varchar(50),
@@ -299,7 +299,7 @@ alter table resources_types
 
 create table resources
 (
-    id                 integer default nextval('ressources_id_seq'::regclass) not null
+    id                 serial
         constraint ressources_pk
             primary key,
     name               varchar(50),
