@@ -4,9 +4,10 @@ import (
 	"log/slog"
 	"net/http"
 
+	"sanctuary-api/controllers"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"sanctuary-api/controllers"
 )
 
 func main() {
@@ -26,9 +27,10 @@ func main() {
 	// GET \\
 	r.GET("/users", controllers.GetUsers)
 	r.GET("/user/:id", controllers.GetUserByID)
-	r.GET("/user/:email", controllers.GetUserByEmail)
+	r.GET("/user/e/:email", controllers.GetUserByEmail)
 	// POST \\
 	r.POST("/register", controllers.Register)
+	r.POST("/login", controllers.Login)
 	///             PLAYER             \\\
 
 	// GET \\
