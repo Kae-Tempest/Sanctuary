@@ -1,7 +1,9 @@
-# Web Game RPG
+# Game Web App RPG
 
-### WORK IN PROGRESS
+- Front (React) : Init
+- BDD (PGSQL) : In Progress
+- API (Go) : In  Progress
+- Docker : Available
+- Mock-up : In Progress
 
-Front (Svelte ?) : waiting for init
-BDD (PGSQL) : In Progress
-API (Go) : In  Progress
+- Figma :  https://www.figma.com/design/PcsX8T5bAognYXKvI4sGNi/Sanctuary?node-id=36-99&t=CTUOKf9gRsUYRMdK-1
