@@ -851,11 +851,78 @@ func DeletePlayer(c *gin.Context) {
 	}
 }
 func DeletePlayerItemInInventory(c *gin.Context) {
+	db := database.Connect()
+	playerID := c.Param("player")
+	itemID := c.Param("item")
+
+	item, err := repository.GetItemByID(ctx, db, itemID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	player, err := repository.GetPlayerByID(ctx, db, playerID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, deleteErr := db.Exec(ctx, `DELETE FROM inventory where item_id = $1 and player_id = $2`, item.ID, player.ID)
+	if deleteErr != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.Status(http.StatusOK)
 
 }
 func DeletePlayerPets(c *gin.Context) {
+	db := database.Connect()
+	playerID := c.Param("player")
+	petID := c.Param("pet")
 
+	pet, err := repository.GetPetByID(ctx, db, petID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	player, err := repository.GetPlayerByID(ctx, db, playerID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, deleteErr := db.Exec(ctx, `DELETE FROM player_pets_mounts where pet_id = $1 and player_id = $2`, pet.ID, player.ID)
+	if deleteErr != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 func DeletePlayerSkill(c *gin.Context) {
+	db := database.Connect()
+	playerID := c.Param("player")
+	skillID := c.Param("skill")
 
+	skill, err := repository.GetSkillByID(ctx, db, skillID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	player, err := repository.GetPlayerByID(ctx, db, playerID)
+	if err != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, deleteErr := db.Exec(ctx, `DELETE FROM player_skill where skill_id = $1 and player_id = $2`, skill.ID, player.ID)
+	if deleteErr != nil {
+		c.String(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
