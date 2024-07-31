@@ -104,10 +104,11 @@ func main() {
 	r.GET("/item/:id", controllers.GetItemByID)
 	r.GET("items/:type", controllers.GetItemByType)
 	// POST \\
-	r.POST("/item", controllers.CreateItem)
+	r.POST("/item/create", controllers.CreateItem)
 	// PATCH \\
 	r.PATCH("/item/:id", controllers.UpdateItem)
 	r.PATCH("/item/:id/stat", controllers.UpdateItemStat)
+	r.PATCH("/item/:id/emplacement", controllers.UpdateItemEmplacement)
 	//DELETE\\
 	r.DELETE("/item/:id", controllers.DeleteItem)
 	///              EQUIPMENT             \\\

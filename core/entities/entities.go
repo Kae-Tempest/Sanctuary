@@ -46,16 +46,18 @@ type Inventory struct {
 	Quantity int `json:"quantity"`
 }
 
-type Items struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Type        int    `json:"type"` // 0 = Equipable, 1 = Consomable, 2 = Quest, 3 = Resources
-
+type Item struct {
+	ID              int             `json:"id"`
+	Name            string          `json:"name"`
+	Description     string          `json:"description"`
+	Type            int             `json:"type"` // 0 = Equipable, 1 = Consomable, 2 = Quest, 3 = Resources
+	Rank            string          `json:"rank"`
+	Stats           ItemStat        `json:"stats"`
+	ItemEmplacement ItemEmplacement `json:"itemEmplacement,omitempty"`
 }
 
 type ItemStat struct {
-	ItemID           int
+	ItemID           int `json:"itemID"`
 	Strength         int `json:"strength"`
 	Constitution     int `json:"constitution"`
 	Mana             int `json:"mana"`
@@ -68,13 +70,14 @@ type ItemStat struct {
 }
 
 type ItemEmplacement struct {
-	ItemID      int    `json:"itemID"`
-	Emplacement string `json:"emplacement"`
+	ItemID      int `json:"itemID"`
+	Emplacement int `json:"emplacement"`
 }
 
 type ItemComplete struct {
-	Item  Items
-	Stats ItemStat
+	Item            Item            `json:"item"`
+	Stats           ItemStat        `json:"stats"`
+	ItemEmplacement ItemEmplacement `json:"itemEmplacement,omitempty"`
 }
 
 type JobSkill struct {

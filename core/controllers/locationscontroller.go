@@ -52,7 +52,7 @@ func GetCreaturesByLocation(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	creatures, err := repository.GetCreaturesByLocation(ctx, db, id)
+	creatures, err := repository.GetMobsByLocation(ctx, db, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -171,12 +171,12 @@ func DeleteLocation(c *gin.Context) {
 		return
 	}
 
-	creatures, cErr := repository.GetCreaturesByLocation(ctx, db, id)
+	creatures, cErr := repository.GetMobsByLocation(ctx, db, id)
 	if cErr != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
-	updateErr = repository.UpdateCreaturesLocation(ctx, db, 0, creatures)
+	updateErr = repository.UpdateMobsLocation(ctx, db, 0, creatures)
 
 	_, deleteErr := db.Exec(ctx, `DELETE FROM locations where id = $1`, location.ID)
 	if deleteErr != nil {

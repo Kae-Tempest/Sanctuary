@@ -33,7 +33,7 @@ func GetOneMob(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -45,7 +45,7 @@ func GetMobSpawn(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -64,7 +64,7 @@ func GetMobSkill(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -91,7 +91,7 @@ func CreateMob(c *gin.Context) {
 	}
 
 	// check if creature exist
-	existingMob, ecErr := repository.GetCreatureByName(ctx, db, mobForm.Name)
+	existingMob, ecErr := repository.GetMobByName(ctx, db, mobForm.Name)
 	if errors.Is(ecErr, pgx.ErrNoRows) {
 		c.JSON(http.StatusConflict, &existingMob)
 	}
@@ -108,7 +108,7 @@ func CreateMob(c *gin.Context) {
 	}
 
 	// Get Creature
-	mob, cErr := repository.GetCreatureByName(ctx, db, mobForm.Name)
+	mob, cErr := repository.GetMobByName(ctx, db, mobForm.Name)
 	if cErr != nil {
 		c.String(http.StatusBadRequest, "bad request")
 	}
@@ -125,7 +125,7 @@ func AddMobSpawn(c *gin.Context) {
 		return
 	}
 
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -164,7 +164,7 @@ func AddMobSkill(c *gin.Context) {
 		return
 	}
 
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -206,7 +206,7 @@ func UpdateMob(c *gin.Context) {
 		return
 	}
 
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -221,7 +221,7 @@ func UpdateMob(c *gin.Context) {
 		return
 	}
 
-	mob, err = repository.GetCreatureByID(ctx, db, id)
+	mob, err = repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -241,7 +241,7 @@ func UpdateMobSpawn(c *gin.Context) {
 	}
 
 	// check if creature exist
-	creature, creatureErr := repository.GetCreatureByID(ctx, db, id)
+	creature, creatureErr := repository.GetMobByID(ctx, db, id)
 	if creatureErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -287,7 +287,7 @@ func UpdateMobSkill(c *gin.Context) {
 	}
 
 	// check if creature exist
-	creature, creatureErr := repository.GetCreatureByID(ctx, db, id)
+	creature, creatureErr := repository.GetMobByID(ctx, db, id)
 	if creatureErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -327,7 +327,7 @@ func DeleteMob(c *gin.Context) {
 	id := c.Param("id")
 
 	// check if mob exist
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -386,7 +386,7 @@ func DeleteMobSpawn(c *gin.Context) {
 	}
 
 	// check if mob exist
-	mob, err := repository.GetCreatureByID(ctx, db, id)
+	mob, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -412,7 +412,7 @@ func DeleteMobSkill(c *gin.Context) {
 	}
 
 	// check if creature exist
-	creature, err := repository.GetCreatureByID(ctx, db, id)
+	creature, err := repository.GetMobByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return

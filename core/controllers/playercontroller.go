@@ -233,7 +233,7 @@ func AddItemToPlayerInventory(c *gin.Context) {
 	}
 
 	// verifier si l'item existe
-	var selectedItem entities.Items
+	var selectedItem entities.Item
 	err := pgxscan.Get(ctx, db, &selectedItem, `SELECT * FROM items where id = $1`, body.ItemID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, "Item with this ID doesn't exist !")
@@ -558,7 +558,7 @@ func UpdatePlayerEquipment(c *gin.Context) {
 		return
 	}
 
-	var selectedItem entities.Items
+	var selectedItem entities.Item
 	err = pgxscan.Get(ctx, db, &selectedItem, `SELECT id FROM items where id = $1`, playerEquipmentForm.ItemID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request selecting item")
@@ -657,7 +657,7 @@ func UpdatePlayerInventory(c *gin.Context) {
 		return
 	}
 
-	var selectedItem entities.Items
+	var selectedItem entities.Item
 	err = pgxscan.Get(ctx, db, &selectedItem, `SELECT id FROM items where id = $1`, playerItemForm.itemID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request selecting item")
@@ -723,7 +723,7 @@ func UpdatePlayerPets(c *gin.Context) {
 			return
 		}
 
-		var petScroll entities.Items
+		var petScroll entities.Item
 		err = pgxscan.Get(ctx, db, &petScroll, `SELECT * FROM items where name like '%$1%'`, mob.Name)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
@@ -779,7 +779,7 @@ func UpdatePlayerSkills(c *gin.Context) {
 
 	if playerSkills.SkillID != 0 {
 
-		var skillScroll entities.Items
+		var skillScroll entities.Item
 		err = pgxscan.Get(ctx, db, &skillScroll, `SELECT * FROM items where name like '%$1%'`, selectedSkill.Name)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")

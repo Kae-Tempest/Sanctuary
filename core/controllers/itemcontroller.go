@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"errors"
-	"github.com/georgysavva/scany/v2/pgxscan"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
+	"log/slog"
 	"net/http"
 	"sanctuary-api/database"
 	"sanctuary-api/entities"
@@ -15,11 +16,16 @@ import (
 func GetItems(c *gin.Context) {
 	db := database.Connect()
 
-	var items []entities.ItemComplete
-	err := pgxscan.Select(ctx, db, &items, `SELECT * FROM items join item_stats on items.id = item_stats.item_id`)
+	rows, queryErr := db.Query(ctx, `SELECT id ,name, description, type, rank,
+	    strength,constitution,mana,stamina,dexterity,intelligence,wisdom,charisma,enchantment_level,emplacement
+		FROM items full join item_stats  on items.id = item_stats.item_id  full join item_emplacement on items.id = item_emplacement.item_id`)
+	if queryErr != nil {
+		fmt.Println(queryErr)
+	}
+
+	items, err := repository.AssignMultipleRows(rows)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "bad request")
-		return
+		fmt.Println(err)
 	}
 
 	c.JSON(http.StatusOK, &items)
@@ -53,50 +59,69 @@ func GetItemByType(c *gin.Context) {
 
 func CreateItem(c *gin.Context) {
 	db := database.Connect()
-	var itemForm entities.ItemComplete
+	var itemForm entities.Item
 	if err := c.ShouldBindBodyWithJSON(&itemForm); err != nil {
+		slog.Error("Error during binding ItemForm", slog.Any("error", err))
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	_, err := repository.GetItemByName(ctx, db, itemForm.Item.Name)
-	if errors.Is(pgx.ErrNoRows, err) {
-		_, insertErr := db.Exec(ctx, `INSERT INTO items (name, description, type) values ($1,$2,$3)`,
-			itemForm.Item.Name, itemForm.Item.Description, itemForm.Item.Type)
+	existingItem, err := repository.GetItemByName(ctx, db, itemForm.Name)
+	if errors.Is(err, pgx.ErrNoRows) {
+		_, insertErr := db.Exec(ctx, `INSERT INTO items (name, description, type, rank) values ($1,$2,$3,$4)`,
+			itemForm.Name, itemForm.Description, itemForm.Type, itemForm.Rank)
 		if insertErr != nil {
-			c.JSON(http.StatusBadRequest, "bad request")
-			return
+			slog.Error("Error Inserting Item", slog.Any("error", insertErr))
+			c.JSON(http.StatusBadRequest, "Error Inserting Item")
 		}
 
-		item, getErr := repository.GetItemByName(ctx, db, itemForm.Item.Name)
+		item, getErr := repository.GetItemInfoByName(ctx, db, itemForm.Name)
 		if getErr != nil {
-			c.JSON(http.StatusBadRequest, "bad request")
+			slog.Error("Error Getting Item by Name", slog.Any("error", getErr))
+			c.JSON(http.StatusBadRequest, "Error Getting Item by Name")
 			return
 		}
 
 		_, insertErr = db.Exec(ctx, `INSERT INTO item_stats (item_id, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, enchantment_level) VALUES  ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
 			item.ID, itemForm.Stats.Strength, itemForm.Stats.Constitution, itemForm.Stats.Mana, itemForm.Stats.Stamina, itemForm.Stats.Dexterity,
 			itemForm.Stats.Intelligence, itemForm.Stats.Wisdom, itemForm.Stats.Charisma, itemForm.Stats.EnchantmentLevel)
+		if insertErr != nil {
+			slog.Error("Error Inserting Item Stat", slog.Any("error", insertErr))
+			c.JSON(http.StatusBadRequest, "Error Inserting Item")
+			return
+		}
 
-		completeItem, cErr := repository.GetCompleteItem(ctx, db, item.ID)
+		_, insertErr = db.Exec(ctx, `INSERT INTO item_emplacement (item_id, emplacement) VALUES ($1,$2)`, item.ID, itemForm.ItemEmplacement.Emplacement)
+		if insertErr != nil {
+			slog.Error("Error Inserting Item Emplacement", slog.Any("error", insertErr))
+			c.JSON(http.StatusBadRequest, "Error Inserting Item")
+			return
+		}
+
+		completeItem, cErr := repository.GetItemByID(ctx, db, strconv.Itoa(item.ID))
 		if cErr != nil {
-			c.JSON(http.StatusBadRequest, "bad request")
+			slog.Error("Error  Getting Item by ID", slog.Any("error", cErr))
+			c.JSON(http.StatusBadRequest, "Error Getting Item by ID")
 			return
 		}
 
 		c.JSON(http.StatusCreated, &completeItem)
-	}
-	if err != nil && !errors.Is(pgx.ErrNoRows, err) {
-		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
-
-	c.JSON(http.StatusConflict, "already exist")
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		slog.Error("Error Getting Item by Name", slog.Any("error", err))
+		c.JSON(http.StatusBadRequest, "Error Getting Item by Name")
+		return
+	}
+	if existingItem.ID != 0 {
+		c.String(http.StatusConflict, "already exist")
+		return
+	}
 }
 
 func UpdateItem(c *gin.Context) {
 	db := database.Connect()
-	var itemForm entities.Items
+	var itemForm entities.Item
 	if err := c.ShouldBindBodyWithJSON(&itemForm); err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -109,7 +134,7 @@ func UpdateItem(c *gin.Context) {
 	}
 
 	_, updateErr := db.Exec(ctx, `UPDATE items set (name, description, type)
-    = ($2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) where id = $1`, item.Item.ID, itemForm.Name, itemForm.Description, itemForm.Type)
+    = ($2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) where id = $1`, item.ID, itemForm.Name, itemForm.Description, itemForm.Type)
 	if updateErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -140,14 +165,43 @@ func UpdateItemStat(c *gin.Context) {
 	}
 
 	_, updateErr := db.Exec(ctx, `UPDATE item_stats set (strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, enchantment_level)
-    = ($2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) where item_id = $1`, item.Item.ID, itemForm.Strength, itemForm.Constitution, itemForm.Mana, itemForm.Stamina, itemForm.Dexterity,
+    = ($2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) where item_id = $1`, item.ID, itemForm.Strength, itemForm.Constitution, itemForm.Mana, itemForm.Stamina, itemForm.Dexterity,
 		itemForm.Intelligence, itemForm.Wisdom, itemForm.Charisma, itemForm.EnchantmentLevel)
 	if updateErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	updatedItem, getErr := repository.GetItemStat(ctx, db, item.Item.ID)
+	updatedItem, getErr := repository.GetItemStat(ctx, db, item.ID)
+	if getErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	c.JSON(http.StatusOK, &updatedItem)
+}
+
+func UpdateItemEmplacement(c *gin.Context) {
+	db := database.Connect()
+	var itemForm entities.ItemEmplacement
+	if err := c.ShouldBindBodyWithJSON(&itemForm); err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	item, err := repository.GetItemByID(ctx, db, strconv.Itoa(itemForm.ItemID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, updateErr := db.Exec(ctx, `INSERT INTO item_emplacement (item_id, emplacement) VALUES ($1,$2) on conflict (item_id) do UPDATE SET emplacement = $2`, item.ID, itemForm.Emplacement)
+	if updateErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	updatedItem, getErr := repository.GetItemEmplacement(ctx, db, item.ID)
 	if getErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -167,7 +221,7 @@ func DeleteItem(c *gin.Context) {
 	}
 
 	// get Player with item
-	players, getErr := repository.GetPlayersWithItem(ctx, db, item.Item.ID)
+	players, getErr := repository.GetPlayersWithItem(ctx, db, item.ID)
 	if getErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -196,36 +250,42 @@ func DeleteItem(c *gin.Context) {
 		}
 
 		switch {
-		case equipment.Helmet == item.Item.ID:
+		case equipment.Helmet == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "helmet", db, c)
-		case equipment.Chestplate == item.Item.ID:
+		case equipment.Chestplate == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "chestplate", db, c)
-		case equipment.Leggings == item.Item.ID:
+		case equipment.Leggings == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "leggings", db, c)
-		case equipment.Boots == item.Item.ID:
+		case equipment.Boots == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "boots", db, c)
-		case equipment.Mainhand == item.Item.ID:
+		case equipment.Mainhand == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "mainhand", db, c)
-		case equipment.Offhand == item.Item.ID:
+		case equipment.Offhand == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "offhand", db, c)
-		case equipment.AccessorySlot0 == item.Item.ID:
+		case equipment.AccessorySlot0 == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "accessory_slot_0", db, c)
-		case equipment.AccessorySlot1 == item.Item.ID:
+		case equipment.AccessorySlot1 == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "accessory_slot_1", db, c)
-		case equipment.AccessorySlot2 == item.Item.ID:
+		case equipment.AccessorySlot2 == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "accessory_slot_2", db, c)
-		case equipment.AccessorySlot3 == item.Item.ID:
+		case equipment.AccessorySlot3 == item.ID:
 			repository.DoUpdateEquipment(ctx, 0, player.ID, "accessory_slot_3", db, c)
 		}
 	}
 
-	_, deleteErr := db.Exec(ctx, `DELETE FROM item_stats where item_id = $1`, item.Item.ID)
+	_, deleteErr := db.Exec(ctx, `DELETE FROM item_stats where item_id = $1`, item.ID)
 	if deleteErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	_, deleteErr = db.Exec(ctx, `DELETE FROM items where id = $1`, item.Item.ID)
+	_, deleteErr = db.Exec(ctx, `DELETE FROM item_emplacement where item_id = $1`, item.ID)
+	if deleteErr != nil {
+		c.JSON(http.StatusBadRequest, "bad request")
+		return
+	}
+
+	_, deleteErr = db.Exec(ctx, `DELETE FROM items where id = $1`, item.ID)
 	if deleteErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
