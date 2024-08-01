@@ -91,6 +91,7 @@ func main() {
 	r.GET("/location/:id/players", controllers.GetPlayersByLocation)
 	r.GET("/location/:id/mobs", controllers.GetCreaturesByLocation)
 	r.GET("/location/:id/resources", controllers.GetResourcesByLocation)
+	r.GET("/location/:id/loots")
 	// POST \\
 	r.POST("/location", controllers.CreateLocation)
 	// PATCH \\
@@ -123,14 +124,83 @@ func main() {
 	r.PATCH("/skill/:id/stats", controllers.UpdateSkillStats)
 	//DELETE\\
 	r.DELETE("/skill/:id", controllers.DeleteSkill)
-	///             GUILD             \\\
 	///             RACE             \\\
+	// GET \\
+	r.GET("/races")
+	r.GET("/race/:id")
+	// POST \\
+	r.POST("/race/create")
+	// PATCH \\
+	r.PATCH("/race/:id")
+	//DELETE\\
+	r.DELETE("/race/:id")
 	///             JOB             \\\
+	// GET \\
+	r.GET("/jobs")
+	r.GET("/job/:id")
+	r.GET("/job/:id/skills")
+	r.GET("/job/:id/skill/:skill")
+	// POST \\
+	r.POST("/job/create")
+	r.POST("/job/skill/create")
+	// PATCH \\
+	r.PATCH("/job/:id")
+	r.PATCH("/job/skill/:id")
+	//DELETE\\
+	r.DELETE("/job/:id")
+	r.DELETE("/job/skill/:id")
 	///             RESOURCE             \\\
-	///              EQUIPMENT             \\\
+	// GET \\
+	r.GET("/resources")
+	r.GET("/resource/:id")
+	r.GET("/resource/type/:type")
+	r.GET("/resource/location/:id")
+	// POST \\
+	r.POST("/resource/create")
+	r.POST("/resource/type/create")
+	// PATCH \\
+	r.PATCH("/resource/:id")
+	r.PATCH("/resource/type/:id")
+	//DELETE\\
+	r.DELETE("/resource/:id")
+	r.DELETE("/resource/type/:id")
 	///             ACTION             \\\
+	// GET \\
+	r.GET("/actions")
+	r.GET("/actions/:player")
+	r.GET("/actions/:type")
+	// POST \\
+	r.POST("/action/create")
+	// PATCH \\
+	r.PATCH("/action/:id")
+	//DELETE\\
+	r.DELETE("/action/:id")
+	///             GUILD             \\\
+	// GET \\
+	r.GET("/guilds")
+	r.GET("/guild/:id")
+	r.GET("/guild/owner/:owner")
+	r.GET("guild/:id/members")
+	// POST \\
+	r.POST("/guild/create")
+	r.POST("/guild/:id/invite/:player")
+	// PATCH \\
+	r.PATCH("/guild/:id")
+	//DELETE\\
+	r.DELETE("/guild/:id")
+	r.DELETE("/guild/:id/eject/:player")
 	///             QUEST             \\\
-	///				LOOT			\\\
+	// GET \\
+	r.GET("/quests")
+	r.GET("/quest/:id")
+	r.GET("/quest/type/:type")
+	r.GET("/quest/rank/:rank")
+	// POST \\
+	r.POST("/quest/create")
+	// PATCH \\
+	r.PATCH("/quest/:id")
+	//DELETE\\
+	r.DELETE("/quest/:id")
 
 	err = r.Run(":8000")
 	if err != nil {
