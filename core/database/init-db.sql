@@ -41,7 +41,8 @@ create table items
             primary key,
     name        varchar(255),
     description text,
-    type        integer
+    type        integer,
+    rank        varchar
 );
 
 alter table items
@@ -49,7 +50,7 @@ alter table items
 
 create table guilds
 (
-    id    serial
+    id    integer default nextval('compagnies_id_seq'::regclass) not null
         constraint guild_pk
             primary key,
     name  varchar(32),
@@ -90,7 +91,7 @@ alter table quests
 
 create table mobs
 (
-    id           serial
+    id           integer default nextval('creatures_id_seq'::regclass) not null
         constraint creatures_pk
             primary key,
     name         varchar(50),
@@ -299,7 +300,7 @@ alter table resources_types
 
 create table resources
 (
-    id                 serial
+    id                 integer default nextval('ressources_id_seq'::regclass) not null
         constraint ressources_pk
             primary key,
     name               varchar(50),
@@ -346,27 +347,6 @@ create table mob_spawn
 alter table mob_spawn
     owner to postgres;
 
-create table job_skill
-(
-    id           integer     not null
-        constraint job_skill_pk
-            primary key,
-    name         varchar(50) not null,
-    type         varchar(6),
-    description  text,
-    strength     integer,
-    constitution integer,
-    mana         integer,
-    stamina      integer,
-    dexterity    integer,
-    intelligence integer,
-    wisdom       integer,
-    charisma     integer
-);
-
-alter table job_skill
-    owner to postgres;
-
 create table player_skill
 (
     player_id integer
@@ -378,19 +358,6 @@ create table player_skill
 );
 
 alter table player_skill
-    owner to postgres;
-
-create table player_job_skill
-(
-    player_id    integer
-        constraint user_job_skill_players_id_fk
-            references players,
-    job_skill_id integer
-        constraint user_job_skill_job_skill_id_fk
-            references job_skill
-);
-
-alter table player_job_skill
     owner to postgres;
 
 create table mob_skill
@@ -481,10 +448,10 @@ alter table loots
 
 create table item_emplacement
 (
-    item_id          integer
+    item_id     integer
         constraint item_emplacement_items_id_fk
             references items,
-    item_emplacement varchar
+    emplacement integer
 );
 
 alter table item_emplacement
@@ -499,5 +466,42 @@ create table users
 );
 
 alter table users
+    owner to postgres;
+
+create table job_skill
+(
+    job_id       integer     not null
+        constraint job_skill_jobs_id_fk
+            references jobs,
+    name         varchar(50) not null,
+    type         varchar(6),
+    description  text,
+    strength     integer,
+    constitution integer,
+    mana         integer,
+    stamina      integer,
+    dexterity    integer,
+    intelligence integer,
+    wisdom       integer,
+    charisma     integer,
+    id           serial
+        constraint job_skill_pk
+            primary key
+);
+
+alter table job_skill
+    owner to postgres;
+
+create table player_job_skill
+(
+    player_id    integer
+        constraint user_job_skill_players_id_fk
+            references players,
+    job_skill_id integer
+        constraint user_job_skill_job_skill_id_fk
+            references job_skill
+);
+
+alter table player_job_skill
     owner to postgres;
 
