@@ -23,133 +23,185 @@ func main() {
 		})
 	})
 
+	// TODO : Uniformiser les routes
+
 	///             USER             \\\
+	users := r.Group("/users")
 	// GET \\
-	r.GET("/users", controllers.GetUsers)
-	r.GET("/user/:id", controllers.GetUserByID)
-	r.GET("/user/e/:email", controllers.GetUserByEmail)
+	users.GET("/", controllers.GetUsers)
+	users.GET("/:id", controllers.GetUserByID)
+	users.GET("/e/:email", controllers.GetUserByEmail)
 	// POST \\
-	r.POST("/register", controllers.Register)
-	r.POST("/login", controllers.Login)
-	///             PLAYER             \\\
+	users.POST("/register", controllers.Register)
+	users.POST("/login", controllers.Login)
 
+	///             PLAYER             \\\ TODO : Player -> Character
+	characters := r.Group("/characters")
 	// GET \\
-	r.GET("/players", controllers.GetAllPlayers)
-	r.GET("/player/:id", controllers.GetOnePlayer)
-	r.GET("/player/:id/stats", controllers.GetPlayerStats)
-	r.GET("/player/:id/equipment", controllers.GetPlayerEquipment)
-	r.GET("/player/:id/inventory", controllers.GetPlayerInventory)
-	r.GET("/player/:id/pets", controllers.GetPlayerPets)
-	r.GET("/player/:id/guild", controllers.GetPlayerGuild)
-	r.GET("/player/:id/skill", controllers.GetPlayerSkill)
+	characters.GET("/", controllers.GetAllCharacters)
+	characters.GET("/:id", controllers.GetOneCharacters)
+	characters.GET("/:id/stats", controllers.GetCharactersStats)
+	characters.GET("/:id/equipment", controllers.GetCharactersEquipment)
+	characters.GET("/:id/inventory", controllers.GetCharactersInventory)
+	characters.GET("/:id/pets", controllers.GetCharactersPets)
+	characters.GET("/:id/guild", controllers.GetCharactersGuild)
+	characters.GET("/:id/skill", controllers.GetCharactersSkill)
 	// POST \\
-	r.POST("/player/create", controllers.CreatePlayer)
-	r.POST("/player/:id/inventory", controllers.AddItemToPlayerInventory)
-	r.POST("/player/:id/pets", controllers.AddPetToPlayer)
-	r.POST("/player/:id/skill", controllers.AddSkillToPlayer)
+	characters.POST("/", controllers.CreateCharacters)
+	characters.POST("/:id/inventory", controllers.AddItemToCharactersInventory)
+	characters.POST("/:id/pets", controllers.AddPetToCharacters)
+	characters.POST("/:id/skill", controllers.AddSkillToCharacters)
 	// PATCH \\
-	r.PATCH("/player/:id/stats", controllers.UpdatePlayerStats)
-	r.PATCH("/player/:id/equipment", controllers.UpdatePlayerEquipment)
-	r.PATCH("/player/:id/inventory", controllers.UpdatePlayerInventory)
-	r.PATCH("/player/:id/pets", controllers.UpdatePlayerPets)
-	r.PATCH("/player/:id/skills", controllers.UpdatePlayerSkills)
-	r.PATCH("/player", controllers.UpdatePlayer)
-	r.PATCH("/player/location", controllers.UpdatePlayerLocation)
+	characters.PATCH("/:id/stats", controllers.UpdateCharactersStats)
+	characters.PATCH("/:id/equipment", controllers.UpdateCharactersEquipment)
+	characters.PATCH("/:id/inventory", controllers.UpdateCharactersInventory)
+	//characters.PATCH("/player/:id/pets", controllers.UpdateCharactersPets) // TODO: Review Update
+	characters.PATCH("/:id/skills", controllers.UpdateCharactersSkills)
+	characters.PATCH("/:id", controllers.UpdateCharacters)
+	characters.PATCH("/:id/location", controllers.UpdateCharactersLocation)
 	//DELETE\\
-	r.DELETE("/player/:id", controllers.DeletePlayer)
-	r.DELETE("/player/:id/inventory", controllers.DeletePlayerItemInInventory)
-	r.DELETE("/player/:id/pets", controllers.DeletePlayerPets)
-	r.DELETE("/player/:id/skill", controllers.DeletePlayerSkill)
+	characters.DELETE("/:id", controllers.DeleteCharacters)
+	characters.DELETE("/:id/inventory", controllers.DeleteCharactersItemInInventory)
+	characters.DELETE("/:id/pets", controllers.DeleteCharactersPets)
+	characters.DELETE("/:id/skill", controllers.DeleteCharactersSkill)
 
-	///             CREATURE             \\\
-
+	///             MOB             \\\
+	mobs := r.Group("/mobs")
 	// GET \\
-	r.GET("/mobs", controllers.GetAllMobs)
-	r.GET("/mob/:id", controllers.GetOneMob)
-	r.GET("/mob/:id/spawn", controllers.GetMobSpawn)
-	r.GET("/mob/:id/skill", controllers.GetMobSkill)
+	mobs.GET("/", controllers.GetAllMobs)
+	mobs.GET("/:id", controllers.GetMobByID)
+	mobs.GET("/:id/spawn", controllers.GetMobSpawn)
+	mobs.GET("/:id/skill", controllers.GetMobSkill)
 	// POST \\
-	r.POST("/mob/create", controllers.CreateMob)
-	r.POST("/mob/spawn", controllers.AddMobSpawn)
-	r.POST("/mob/skill", controllers.AddMobSkill)
-	r.POST("/mob/loot", controllers.AddMobLoot)
+	mobs.POST("/", controllers.CreateMob)
+	mobs.POST(":id/spawn", controllers.AddMobSpawn)
+	mobs.POST(":id/skill", controllers.AddMobSkill)
+	mobs.POST(":id/loot", controllers.AddMobLoot)
 	// PATCH \\
-	r.PATCH("/mob/:id", controllers.UpdateMob)
-	r.PATCH("/mob/:id/spawn", controllers.UpdateMobSpawn)
-	r.PATCH("/mob/:id/skill", controllers.UpdateMobSkill)
-	r.PATCH("/mob/:id/loot", controllers.UpdateMobLoot)
+	mobs.PATCH("/:id", controllers.UpdateMob)
+	mobs.PATCH("/:id/spawn", controllers.UpdateMobSpawn)
+	mobs.PATCH("/:id/skill", controllers.UpdateMobSkill)
+	mobs.PATCH("/:id/loot", controllers.UpdateMobLoot)
 	//DELETE\\
-	r.DELETE("/mob/:id", controllers.DeleteMob)
-	r.DELETE("/mob/:id/spawn", controllers.DeleteMobSpawn)
-	r.DELETE("/mob/:id/skill", controllers.DeleteMobSkill)
-	r.DELETE("/mob/:id/loot", controllers.DeleteMobLoot)
+	mobs.DELETE("/:id", controllers.DeleteMob)
+	mobs.DELETE("/:id/spawn", controllers.DeleteMobSpawn)
+	mobs.DELETE("/:id/skill", controllers.DeleteMobSkill)
+	mobs.DELETE("/:id/loot", controllers.DeleteMobLoot)
 
-	///             LOCATIONS             \\\
+	///             LOCATIONS             \\\ TODO : Definir des actions possible / zones
+	locations := r.Group("/")
 	// GET \\
-	r.GET("/locations", controllers.GetLocations)
-	r.GET("/location/:id", controllers.GetLocationByID)
-	r.GET("/location/:id/players", controllers.GetPlayersByLocation)
-	r.GET("/location/:id/mobs", controllers.GetCreaturesByLocation)
-	r.GET("/location/:id/resources", controllers.GetResourcesByLocation)
-	r.GET("/location/:id/loots")
+	locations.GET("/", controllers.GetLocations)
+	locations.GET("/:id", controllers.GetLocationByID)
+	locations.GET("/:id/players", controllers.GetCharactersByLocation)
+	locations.GET("/:id/mobs", controllers.GetCreaturesByLocation)
+	locations.GET("/:id/resources", controllers.GetResourcesByLocation)
+	locations.GET("/:id/actions")
+	locations.GET("/:id/loots")
 	// POST \\
-	r.POST("/location", controllers.CreateLocation)
+	locations.POST("/", controllers.CreateLocation)
 	// PATCH \\
-	r.PATCH("/location/:id", controllers.UpdateLocation)
+	locations.PATCH("/:id", controllers.UpdateLocation)
 	//DELETE\\
-	r.DELETE("/location/:id", controllers.DeleteLocation)
+	locations.DELETE("/:id", controllers.DeleteLocation)
 
 	///             ITEMS             \\\
+	items := r.Group("/items")
 	// GET \\
-	r.GET("/items", controllers.GetItems)
-	r.GET("/item/:id", controllers.GetItemByID)
-	r.GET("/item/type/:type", controllers.GetItemByType)
+	items.GET("/", controllers.GetItems)
+	items.GET("/:id", controllers.GetItemByID)
+	items.GET("/type/:type", controllers.GetItemByType)
 	// POST \\
-	r.POST("/item/create", controllers.CreateItem)
+	items.POST("/", controllers.CreateItem)
 	// PATCH \\
-	r.PATCH("/item/:id", controllers.UpdateItem)
-	r.PATCH("/item/:id/stat", controllers.UpdateItemStat)
-	r.PATCH("/item/:id/emplacement", controllers.UpdateItemEmplacement)
+	items.PATCH("/:id", controllers.UpdateItem)
+	items.PATCH("/:id/stat", controllers.UpdateItemStat)
+	items.PATCH("/:id/emplacement", controllers.UpdateItemEmplacement)
 	//DELETE\\
-	r.DELETE("/item/:id", controllers.DeleteItem)
-	///             SKILL             \\\
+	items.DELETE("/:id", controllers.DeleteItem)
+	///             SKILL             \\\ // TODO : Gestion d'assignation de skill
+	skills := r.Group("/skills")
 	// GET \\
-	r.GET("/skills", controllers.GetSkills)
-	r.GET("/skill/:id", controllers.GetSkillByID)
-	r.GET("/skill/type/:type", controllers.GetSkillByType)
+	skills.GET("/", controllers.GetSkills)
+	skills.GET("/:id", controllers.GetSkillByID)
+	skills.GET("/type/:type", controllers.GetSkillByType)
 	// POST \\
-	r.POST("/skill/create", controllers.CreateSkill)
+	skills.POST("/", controllers.CreateSkill)
 	// PATCH \\
-	r.PATCH("/skill/:id/info", controllers.UpdateSkillInfo)
-	r.PATCH("/skill/:id/stats", controllers.UpdateSkillStats)
+	skills.PATCH("/:id/info", controllers.UpdateSkillInfo)
+	skills.PATCH("/:id/stats", controllers.UpdateSkillStats)
 	//DELETE\\
-	r.DELETE("/skill/:id", controllers.DeleteSkill)
+	skills.DELETE("/:id", controllers.DeleteSkill)
 	///             RACE             \\\
+	races := r.Group("/races")
 	// GET \\
-	r.GET("/races")
-	r.GET("/race/:id")
+	races.GET("/races")
+	races.GET("/race/:id")
 	// POST \\
-	r.POST("/race/create")
+	races.POST("/race/create")
 	// PATCH \\
-	r.PATCH("/race/:id")
+	races.PATCH("/race/:id")
 	//DELETE\\
-	r.DELETE("/race/:id")
+	races.DELETE("/race/:id")
 	///             JOB             \\\
+	jobs := r.Group("jobs")
 	// GET \\
-	r.GET("/jobs")
-	r.GET("/job/:id")
-	r.GET("/job/:id/skills")
-	r.GET("/job/:id/skill/:skill")
+	jobs.GET("/jobs")
+	jobs.GET("/job/:id")
+	jobs.GET("/job/:id/skills")
+	jobs.GET("/job/:id/skill/:skill")
 	// POST \\
-	r.POST("/job/create")
-	r.POST("/job/skill/create")
+	jobs.POST("/job/create")
+	jobs.POST("/job/skill/create")
 	// PATCH \\
-	r.PATCH("/job/:id")
-	r.PATCH("/job/skill/:id")
+	jobs.PATCH("/job/:id")
+	jobs.PATCH("/job/skill/:id")
 	//DELETE\\
-	r.DELETE("/job/:id")
-	r.DELETE("/job/skill/:id")
-	///             RESOURCE             \\\
+	jobs.DELETE("/job/:id")
+	jobs.DELETE("/job/skill/:id")
+
+	///             ACTION LOGS            \\\
+	logs := r.Group("/logs")
+	// GET \\
+	logs.GET("/actions")
+	logs.GET("/actions/:player")
+	logs.GET("/actions/:type")
+	// POST \\
+	logs.POST("/action/create")
+	// PATCH \\
+	logs.PATCH("/action/:id")
+	//DELETE\\
+	logs.DELETE("/action/:id")
+	///             GUILD             \\\
+	guilds := r.Group("/guilds")
+	// GET \\
+	guilds.GET("/guilds")
+	guilds.GET("/guild/:id")
+	guilds.GET("/guild/owner/:owner")
+	guilds.GET("guild/:id/members")
+	// POST \\
+	guilds.POST("/guild/create")
+	guilds.POST("/guild/:id/invite/:player")
+	// PATCH \\
+	guilds.PATCH("/guild/:id")
+	//DELETE\\
+	guilds.DELETE("/guild/:id")
+	guilds.DELETE("/guild/:id/eject/:player")
+	///             QUEST             \\\
+	quests := r.Group("/quests")
+	// GET \\
+	quests.GET("/quests")
+	quests.GET("/quest/:id")
+	quests.GET("/quest/type/:type")
+	quests.GET("/quest/rank/:rank")
+	// POST \\
+	quests.POST("/quest/create")
+	// PATCH \\
+	quests.PATCH("/quest/:id")
+	//DELETE\\
+	quests.DELETE("/quest/:id")
+
+	///             RESOURCE             \\\ TODO : Revoir les resources ( + DB )
 	// GET \\
 	r.GET("/resources")
 	r.GET("/resource/:id")
@@ -164,43 +216,6 @@ func main() {
 	//DELETE\\
 	r.DELETE("/resource/:id")
 	r.DELETE("/resource/type/:id")
-	///             ACTION             \\\
-	// GET \\
-	r.GET("/actions")
-	r.GET("/actions/:player")
-	r.GET("/actions/:type")
-	// POST \\
-	r.POST("/action/create")
-	// PATCH \\
-	r.PATCH("/action/:id")
-	//DELETE\\
-	r.DELETE("/action/:id")
-	///             GUILD             \\\
-	// GET \\
-	r.GET("/guilds")
-	r.GET("/guild/:id")
-	r.GET("/guild/owner/:owner")
-	r.GET("guild/:id/members")
-	// POST \\
-	r.POST("/guild/create")
-	r.POST("/guild/:id/invite/:player")
-	// PATCH \\
-	r.PATCH("/guild/:id")
-	//DELETE\\
-	r.DELETE("/guild/:id")
-	r.DELETE("/guild/:id/eject/:player")
-	///             QUEST             \\\
-	// GET \\
-	r.GET("/quests")
-	r.GET("/quest/:id")
-	r.GET("/quest/type/:type")
-	r.GET("/quest/rank/:rank")
-	// POST \\
-	r.POST("/quest/create")
-	// PATCH \\
-	r.PATCH("/quest/:id")
-	//DELETE\\
-	r.DELETE("/quest/:id")
 
 	err = r.Run(":8000")
 	if err != nil {
