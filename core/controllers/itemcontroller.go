@@ -23,7 +23,7 @@ func GetItems(c *gin.Context) {
 		fmt.Println(queryErr)
 	}
 
-	items, err := repository.AssignMultipleRows(rows)
+	items, err := repository.AssignMultipleRowsItem(rows)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -17,7 +17,7 @@ func GetItemByID(ctx context.Context, db *pgxpool.Pool, itemID string) (entities
 	    strength,constitution,mana,stamina,dexterity,intelligence,wisdom,charisma,enchantment_level,emplacement
 		FROM items full join item_stats  on items.id = item_stats.item_id  full join item_emplacement on items.id = item_emplacement.item_id where id = $1`, itemID)
 
-	item, scanErr := assignOneRow(rows)
+	item, scanErr := assignOneRowItem(rows)
 	if scanErr != nil {
 		fmt.Println(scanErr, "scanErr")
 		return item, scanErr
@@ -41,7 +41,7 @@ func GetItemByName(ctx context.Context, db *pgxpool.Pool, itemName string) (enti
 	    strength,constitution,mana,stamina,dexterity,intelligence,wisdom,charisma,enchantment_level,emplacement
 		FROM items full join item_stats  on items.id = item_stats.item_id  full join item_emplacement on items.id = item_emplacement.item_id where name = $1`, itemName)
 
-	item, scanErr := assignOneRow(rows)
+	item, scanErr := assignOneRowItem(rows)
 
 	if scanErr != nil {
 		slog.Error("Error Selection Item (scan return)", slog.Any("error", scanErr))
@@ -59,7 +59,7 @@ func GetItemsByType(ctx context.Context, db *pgxpool.Pool, itemType string) ([]e
 		return []entities.Item{}, err
 	}
 
-	items, scanErr := AssignMultipleRows(rows)
+	items, scanErr := AssignMultipleRowsItem(rows)
 	if scanErr != nil {
 		return items, scanErr
 	}
@@ -87,7 +87,7 @@ func GetItemEmplacement(ctx context.Context, db *pgxpool.Pool, itemID int) (enti
 	return item, nil
 }
 
-func assignOneRow(rows pgx.Row) (entities.Item, error) {
+func assignOneRowItem(rows pgx.Row) (entities.Item, error) {
 	item := entities.Item{}
 
 	var id sql.Null[int]
@@ -140,7 +140,7 @@ func assignOneRow(rows pgx.Row) (entities.Item, error) {
 	return item, nil
 }
 
-func AssignMultipleRows(rows pgx.Rows) ([]entities.Item, error) {
+func AssignMultipleRowsItem(rows pgx.Rows) ([]entities.Item, error) {
 	var items []entities.Item
 	defer rows.Close()
 

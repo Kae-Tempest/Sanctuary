@@ -294,7 +294,7 @@ func UpdateMobSkill(c *gin.Context) {
 	}
 
 	// check if skill exist
-	skill, skillErr := repository.GetSkillByID(ctx, db, strconv.Itoa(mobSkillForm.SkillID))
+	skill, skillErr := repository.GetSkillInfoByID(ctx, db, strconv.Itoa(mobSkillForm.SkillID))
 	if skillErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return

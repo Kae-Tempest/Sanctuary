@@ -906,7 +906,7 @@ func DeletePlayerSkill(c *gin.Context) {
 	playerID := c.Param("player")
 	skillID := c.Param("skill")
 
-	skill, err := repository.GetSkillByID(ctx, db, skillID)
+	skill, err := repository.GetSkillInfoByID(ctx, db, skillID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return

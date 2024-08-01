@@ -245,10 +245,11 @@ type ResourcesType struct {
 }
 
 type Skill struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Type        string `json:"type"` // physic or magic
-	Description string `json:"description"`
+	ID          int       `json:"id"`
+	Name        string    `json:"name"`
+	Type        string    `json:"type"` // physic or magic
+	Description string    `json:"description"`
+	SkillStat   SkillStat `json:"skillStat"`
 }
 
 type SkillStat struct {

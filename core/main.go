@@ -102,7 +102,7 @@ func main() {
 	// GET \\
 	r.GET("/items", controllers.GetItems)
 	r.GET("/item/:id", controllers.GetItemByID)
-	r.GET("items/:type", controllers.GetItemByType)
+	r.GET("/item/type/:type", controllers.GetItemByType)
 	// POST \\
 	r.POST("/item/create", controllers.CreateItem)
 	// PATCH \\
@@ -111,14 +111,25 @@ func main() {
 	r.PATCH("/item/:id/emplacement", controllers.UpdateItemEmplacement)
 	//DELETE\\
 	r.DELETE("/item/:id", controllers.DeleteItem)
-	///              EQUIPMENT             \\\
-	///             QUEST             \\\
-	///             JOB             \\\
-	///             RACE             \\\
-	///             RESOURCE             \\\
-	///             ACTION             \\\
-	///             GUILD             \\\
 	///             SKILL             \\\
+	// GET \\
+	r.GET("/skills", controllers.GetSkills)
+	r.GET("/skill/:id", controllers.GetSkillByID)
+	r.GET("/skill/type/:type", controllers.GetSkillByType)
+	// POST \\
+	r.POST("/skill/create", controllers.CreateSkill)
+	// PATCH \\
+	r.PATCH("/skill/:id/info", controllers.UpdateSkillInfo)
+	r.PATCH("/skill/:id/stats", controllers.UpdateSkillStats)
+	//DELETE\\
+	r.DELETE("/skill/:id", controllers.DeleteSkill)
+	///             GUILD             \\\
+	///             RACE             \\\
+	///             JOB             \\\
+	///             RESOURCE             \\\
+	///              EQUIPMENT             \\\
+	///             ACTION             \\\
+	///             QUEST             \\\
 	///				LOOT			\\\
 
 	err = r.Run(":8000")
