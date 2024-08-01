@@ -18,7 +18,7 @@ import (
 func GetAllMobs(c *gin.Context) {
 	db := database.Connect()
 	var mobs []entities.Mob
-	err := pgxscan.Select(ctx, db, &mobs, `SELECT * FROM mobs`)
+	err := pgxscan.Select(ctx, db, &mobs, `SELECT id, name, is_pet, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, level, hp FROM mobs`)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -52,7 +52,7 @@ func GetMobSpawn(c *gin.Context) {
 	}
 
 	var creatureSpawn entities.MobSpawns
-	err = pgxscan.Get(ctx, db, &creatureSpawn, `SELECT * FROM mob_spawn where mob_id = $1`, mob.ID)
+	err = pgxscan.Get(ctx, db, &creatureSpawn, `SELECT mob_id, location_id, level_required, spawn_rate FROM mob_spawn where mob_id = $1`, mob.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -71,7 +71,7 @@ func GetMobSkill(c *gin.Context) {
 	}
 
 	var creatureSkill []entities.MobSkill
-	err = pgxscan.Select(ctx, db, &creatureSkill, `SELECT * FROM mob_skill where mob_id = $1`, mob.ID)
+	err = pgxscan.Select(ctx, db, &creatureSkill, `SELECT mob_id, skill_id FROM mob_skill where mob_id = $1`, mob.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -146,7 +146,7 @@ func AddMobSpawn(c *gin.Context) {
 	}
 
 	var mobSpawn entities.MobSpawns
-	err = pgxscan.Get(ctx, db, &mobSpawn, `SELECT * FROM mob_spawn where mob_id = $1 AND location_id = $2`, mob.ID, selectedEmplacement.ID)
+	err = pgxscan.Get(ctx, db, &mobSpawn, `SELECT mob_id, location_id, level_required, spawn_rate FROM mob_spawn where mob_id = $1 AND location_id = $2`, mob.ID, selectedEmplacement.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -184,7 +184,7 @@ func AddMobSkill(c *gin.Context) {
 	}
 
 	var mobSkill entities.MobSpawns
-	err = pgxscan.Get(ctx, db, &mobSkill, `SELECT * FROM skills s join mob_skill cs on s.id = cs.skill_id where mob_id = $1 and s.id = $2`, mob.ID, seletecdSkill.ID)
+	err = pgxscan.Get(ctx, db, &mobSkill, `SELECT id, name, description, type, mob_id, skill_id FROM skills s join mob_skill cs on s.id = cs.skill_id where mob_id = $1 and s.id = $2`, mob.ID, seletecdSkill.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -255,7 +255,7 @@ func UpdateMobSpawn(c *gin.Context) {
 	}
 	// check if location do not already assign
 	var mobSpawns entities.MobSpawns
-	err := pgxscan.Get(ctx, db, &mobSpawns, `SELECT * FROM mob_spawn WHERE mob_id = $1 AND location_id = $2`, creature.ID, location.ID)
+	err := pgxscan.Get(ctx, db, &mobSpawns, `SELECT mob_id, location_id, level_required, spawn_rate FROM mob_spawn WHERE mob_id = $1 AND location_id = $2`, creature.ID, location.ID)
 	if errors.Is(pgx.ErrNoRows, err) {
 		_, insertErr := db.Exec(ctx, `INSERT INTO mob_spawn (mob_id, location_id, level_required, spawn_rate) values ($1,$2,$3,$4)`,
 			creature.ID, location.ID, mobSpawnsForm.LevelRequired, mobSpawnsForm.SpawnRate)
@@ -302,7 +302,7 @@ func UpdateMobSkill(c *gin.Context) {
 
 	// check if creature do not already have this skill
 	var mobSkill entities.MobSkill
-	err := pgxscan.Get(ctx, db, &mobSkill, `SELECT * FROM mob_skill WHERE mob_id = $1 AND skill_id = $2`, creature.ID, skill.ID)
+	err := pgxscan.Get(ctx, db, &mobSkill, `SELECT mob_id, skill_id FROM mob_skill WHERE mob_id = $1 AND skill_id = $2`, creature.ID, skill.ID)
 	if errors.Is(pgx.ErrNoRows, err) {
 		_, insertErr := db.Exec(ctx, `INSERT INTO mob_skill (mob_id, skill_id) values ($1,$2)`,
 			creature.ID, skill.ID)
@@ -348,7 +348,7 @@ func DeleteMob(c *gin.Context) {
 	if mob.IsPet {
 		// select pet
 		var selectedPets entities.PetsMounts
-		err := pgxscan.Get(ctx, db, &selectedPets, `SELECT * FROM pets_mounts where mob_id = $1`, mob.ID)
+		err := pgxscan.Get(ctx, db, &selectedPets, `SELECT mob_id, is_mountable, speed, id FROM pets_mounts where mob_id = $1`, mob.ID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return

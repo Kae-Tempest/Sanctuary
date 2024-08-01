@@ -14,7 +14,7 @@ func GetLocations(c *gin.Context) {
 	db := database.Connect()
 
 	var locations []entities.Locations
-	err := pgxscan.Select(ctx, db, &locations, `SELECT * FROM locations`)
+	err := pgxscan.Select(ctx, db, &locations, `SELECT id, name, is_safety, difficulty, type, size FROM locations`)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -27,7 +27,7 @@ func GetLocationByID(c *gin.Context) {
 	id := c.Param("id")
 
 	var location entities.Locations
-	err := pgxscan.Select(ctx, db, &location, `SELECT * FROM locations where id = $1`, id)
+	err := pgxscan.Select(ctx, db, &location, `SELECT id, name, is_safety, difficulty, type, size FROM locations where id = $1`, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -65,7 +65,7 @@ func GetResourcesByLocation(c *gin.Context) {
 	id := c.Param("id")
 
 	var resources []entities.Resources
-	err := pgxscan.Select(ctx, db, &resources, `SELECT * FROM resources where location_id = $1`, id)
+	err := pgxscan.Select(ctx, db, &resources, `SELECT id, name, location_id, ressources_type_id, quantities_per_min FROM resources where location_id = $1`, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return

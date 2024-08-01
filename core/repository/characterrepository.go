@@ -38,7 +38,7 @@ func CheckEquipmentEmplacement(playerEquipments entities.Equipment, emplacement 
 }
 func DoUpsertItemInInventory(ctx context.Context, itemID int, playerID int, quantity int, db *pgxpool.Pool, c *gin.Context) {
 	_, err := db.Exec(ctx, `
-INSERT INTO inventory (item_id, quantity, player_id) VALUES ($1, $2 ,$3)
+INSERT INTO inventory (item_id, quantity, character_id) VALUES ($1, $2 ,$3)
 ON CONFLICT (item_id) DO UPDATE
 SET quantity = inventory.quantity + EXCLUDED.quantity;`, itemID, quantity, playerID)
 	if err != nil {

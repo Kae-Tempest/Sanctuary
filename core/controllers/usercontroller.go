@@ -14,7 +14,7 @@ func GetUsers(c *gin.Context) {
 	db := database.Connect()
 
 	var users []entities.User
-	err := pgxscan.Select(ctx, db, &users, `SELECT * FROM users`)
+	err := pgxscan.Select(ctx, db, &users, `SELECT email, create_at, updated_at  FROM users`)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 	}
@@ -27,7 +27,7 @@ func GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 
 	var user entities.User
-	err := pgxscan.Get(ctx, db, &user, `SELECT * FROM users where id = $1`, id)
+	err := pgxscan.Get(ctx, db, &user, `SELECT email, create_at, updated_at FROM users where id = $1`, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 	}
@@ -40,7 +40,7 @@ func GetUserByEmail(c *gin.Context) {
 	email := c.Param("email")
 
 	var user entities.User
-	err := pgxscan.Get(ctx, db, &user, `SELECT * FROM users where email = $1`, email)
+	err := pgxscan.Get(ctx, db, &user, `SELECT email, create_at, updated_at FROM users where email = $1`, email)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 	}
@@ -74,7 +74,7 @@ func Register(c *gin.Context) {
 		}
 
 		var user entities.User
-		err = pgxscan.Get(ctx, db, &user, `SELECT * FROM users where email = $1`, userForm.Email)
+		err = pgxscan.Get(ctx, db, &user, `SELECT email, create_at, updated_at FROM users where email = $1`, userForm.Email)
 		if err != nil {
 			c.String(http.StatusBadRequest, "bad request")
 			return
