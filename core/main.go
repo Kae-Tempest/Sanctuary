@@ -23,8 +23,6 @@ func main() {
 		})
 	})
 
-	// TODO : Uniformiser les routes
-
 	///             USER             \\\
 	users := r.Group("/users")
 	// GET \\
@@ -35,7 +33,7 @@ func main() {
 	users.POST("/register", controllers.Register)
 	users.POST("/login", controllers.Login)
 
-	///             PLAYER             \\\ TODO : Player -> Character
+	///             PLAYER             \\\
 	characters := r.Group("/characters")
 	// GET \\
 	characters.GET("/", controllers.GetAllCharacters)
@@ -55,7 +53,6 @@ func main() {
 	characters.PATCH("/:id/stats", controllers.UpdateCharactersStats)
 	characters.PATCH("/:id/equipment", controllers.UpdateCharactersEquipment)
 	characters.PATCH("/:id/inventory", controllers.UpdateCharactersInventory)
-	//characters.PATCH("/player/:id/pets", controllers.UpdateCharactersPets) // TODO: Review Update
 	characters.PATCH("/:id/skills", controllers.UpdateCharactersSkills)
 	characters.PATCH("/:id", controllers.UpdateCharacters)
 	characters.PATCH("/:id/location", controllers.UpdateCharactersLocation)
@@ -119,7 +116,7 @@ func main() {
 	items.PATCH("/:id/emplacement", controllers.UpdateItemEmplacement)
 	//DELETE\\
 	items.DELETE("/:id", controllers.DeleteItem)
-	///             SKILL             \\\ // TODO : Gestion d'assignation de skill
+	///             SKILL             \\\ TODO : Gestion d'assignation de skill
 	skills := r.Group("/skills")
 	// GET \\
 	skills.GET("/", controllers.GetSkills)
