@@ -141,20 +141,20 @@ create table locations
 alter table locations
     owner to postgres;
 
-create table players
+create table characters
 (
-    id             serial
-        constraint players_pk
+    id             integer default nextval('players_id_seq'::regclass) not null
+        constraint characters_pk_2
             primary key,
     email          varchar(32)
-        constraint players_pk_2
+        constraint characters_pk
             unique,
     username       varchar(32),
     race_id        integer
-        constraint players_races_id_fk
+        constraint characters_races_id_fk
             references races,
     job_id         integer
-        constraint players_jobs_id_fk
+        constraint characters_jobs_id_fk
             references jobs,
     exp            integer,
     level          smallint,
@@ -162,23 +162,23 @@ create table players
     inventory_size integer,
     po             bigint,
     location_id    integer
-        constraint players_locations_id_fk
+        constraint characters_locations_id_fk
             references locations,
     user_id        integer
 );
 
-alter table players
+alter table characters
     owner to postgres;
 
 create table inventory
 (
-    player_id integer
+    character_id integer
         constraint inventory_players_id_fk
-            references players,
-    item_id   integer
+            references characters,
+    item_id      integer
         constraint inventory_items_id_fk
             references items,
-    quantity  integer
+    quantity     integer
 );
 
 alter table inventory
@@ -186,15 +186,15 @@ alter table inventory
 
 create table guilds_members
 (
-    id        serial
+    id           serial
         constraint guilds_members_pk
             primary key,
-    guilds_id integer
+    guilds_id    integer
         constraint guilds_members_guildss_id_fk
             references guilds,
-    player_id integer
+    character_id integer
         constraint guilds_members_players_id_fk
-            references players
+            references characters
 );
 
 alter table guilds_members
@@ -202,9 +202,9 @@ alter table guilds_members
 
 create table equipment
 (
-    player_id        integer
+    character_id     integer
         constraint equipment_players_id_fk
-            references players,
+            references characters,
     helmet           integer,
     chestplate       integer,
     leggings         integer,
@@ -222,9 +222,9 @@ alter table equipment
 
 create table stats
 (
-    player_id    integer
+    character_id integer
         constraint stats_players_id_fk
-            references players,
+            references characters,
     strength     integer,
     constitution integer,
     mana         integer,
@@ -244,9 +244,9 @@ create table summons_beats
     id           serial
         constraint summons_beats_pk
             primary key,
-    player_id    integer
+    character_id integer
         constraint summons_beats_players_id_fk
-            references players,
+            references characters,
     name         varchar(50),
     strength     integer,
     constitution integer,
@@ -261,30 +261,30 @@ create table summons_beats
 alter table summons_beats
     owner to postgres;
 
-create table player_pets_mounts
+create table character_pets_mounts
 (
-    pet_id    integer
+    pet_id       integer
         constraint user_pets_mounts_pets_mounts_id_fk
             references pets_mounts,
-    player_id integer
+    character_id integer
         constraint user_pets_mounts_players_id_fk
-            references players
+            references characters
 );
 
-alter table player_pets_mounts
+alter table character_pets_mounts
     owner to postgres;
 
-create table players_actions
+create table character_actions
 (
-    player_id  integer
+    character_id integer
         constraint players_actions_players_id_fk
-            references players,
-    action     varchar(50),
-    created_at timestamp,
-    end_at     timestamp
+            references characters,
+    action       varchar(50),
+    created_at   timestamp,
+    end_at       timestamp
 );
 
-alter table players_actions
+alter table character_actions
     owner to postgres;
 
 create table resources_types
@@ -318,15 +318,15 @@ alter table resources
 
 create table ressource_inventory
 (
-    player_id integer
+    character_id integer
         constraint ressource_inventory_players_id_fk
-            references players,
-    item_id   integer
+            references characters,
+    item_id      integer
         constraint ressource_inventory_pk
             unique
         constraint ressource_inventory_resources_id_fk
             references resources,
-    quantity  integer
+    quantity     integer
 );
 
 alter table ressource_inventory
@@ -347,17 +347,17 @@ create table mob_spawn
 alter table mob_spawn
     owner to postgres;
 
-create table player_skill
+create table character_skill
 (
-    player_id integer
+    character_id integer
         constraint user_skill_players_id_fk
-            references players,
-    skill_id  integer
+            references characters,
+    skill_id     integer
         constraint user_skill_skills_id_fk
             references skills
 );
 
-alter table player_skill
+alter table character_skill
     owner to postgres;
 
 create table mob_skill
@@ -375,17 +375,17 @@ alter table mob_skill
 
 create table hunt_action
 (
-    player_id   integer
+    character_id integer
         constraint hunt_action_players_id_fk
-            references players,
-    location_id integer
+            references characters,
+    location_id  integer
         constraint hunt_action_locations_id_fk
             references locations,
-    mob_id      integer
+    mob_id       integer
         constraint hunt_action_mobs_id_fk
             references mobs,
-    start_at    timestamp,
-    end_at      timestamp
+    start_at     timestamp,
+    end_at       timestamp
 );
 
 alter table hunt_action
@@ -492,16 +492,16 @@ create table job_skill
 alter table job_skill
     owner to postgres;
 
-create table player_job_skill
+create table character_job_skill
 (
-    player_id    integer
+    character_id integer
         constraint user_job_skill_players_id_fk
-            references players,
+            references characters,
     job_skill_id integer
         constraint user_job_skill_job_skill_id_fk
             references job_skill
 );
 
-alter table player_job_skill
+alter table character_job_skill
     owner to postgres;
 

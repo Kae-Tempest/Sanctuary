@@ -17,10 +17,9 @@ import (
 var ctx = context.Background()
 
 // GET \\
-func GetAllPlayers(c *gin.Context) {
+func GetAllCharacters(c *gin.Context) {
 	db := database.Connect()
-	var players []entities.Player
-	err := pgxscan.Select(ctx, db, &players, `SELECT * FROM players`)
+	var players []entities.Characters
 	err := pgxscan.Select(ctx, db, &players, `SELECT id, email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id, user_id FROM characters`)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
@@ -32,11 +31,11 @@ func GetAllPlayers(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{})
 	}
 }
-func GetOnePlayer(c *gin.Context) {
+func GetOneCharacters(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -44,11 +43,11 @@ func GetOnePlayer(c *gin.Context) {
 
 	c.JSON(http.StatusOK, &player)
 }
-func GetPlayerStats(c *gin.Context) {
+func GetCharactersStats(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -63,11 +62,11 @@ func GetPlayerStats(c *gin.Context) {
 	c.JSON(http.StatusOK, &playerStats)
 
 }
-func GetPlayerEquipment(c *gin.Context) {
+func GetCharactersEquipment(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -82,11 +81,11 @@ func GetPlayerEquipment(c *gin.Context) {
 	c.JSON(http.StatusOK, &playerEquipment)
 
 }
-func GetPlayerInventory(c *gin.Context) {
+func GetCharactersInventory(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -101,18 +100,18 @@ func GetPlayerInventory(c *gin.Context) {
 	c.JSON(http.StatusOK, &playerInventory)
 
 }
-func GetPlayerPets(c *gin.Context) {
+func GetCharactersPets(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	var playerPets []entities.PlayerPet
-	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM player_pets_mounts where player_id = $1`, player.ID)
+	var playerPets []entities.CharactersPet
+	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM character_pets_mounts where character_id = $1`, player.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -120,11 +119,11 @@ func GetPlayerPets(c *gin.Context) {
 	c.JSON(http.StatusOK, &playerPets)
 
 }
-func GetPlayerGuild(c *gin.Context) {
+func GetCharactersGuild(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -139,11 +138,11 @@ func GetPlayerGuild(c *gin.Context) {
 	c.JSON(http.StatusOK, &playerGuild)
 
 }
-func GetPlayerSkill(c *gin.Context) {
+func GetCharactersSkill(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -160,33 +159,33 @@ func GetPlayerSkill(c *gin.Context) {
 }
 
 // POST \\
-func CreatePlayer(c *gin.Context) {
+func CreateCharacters(c *gin.Context) {
 	db := database.Connect()
-	var playerForm entities.Player
+	var playerForm entities.Characters
 	if err := c.ShouldBindBodyWithJSON(&playerForm); err != nil {
 		c.String(http.StatusBadRequest, "bad request during bind JSON")
 		return
 	}
 
-	existingPlayer, epErr := repository.GetPlayerByEmail(ctx, db, playerForm.Email)
+	existingCharacters, epErr := repository.GetCharactersByEmail(ctx, db, playerForm.Email)
 	if errors.Is(pgx.ErrNoRows, epErr) {
 		c.JSON(http.StatusConflict, "existing player"+epErr.Error())
-		fmt.Println(existingPlayer)
+		fmt.Println(existingCharacters)
 	}
 	if epErr != nil && !errors.Is(epErr, pgx.ErrNoRows) {
 		c.String(http.StatusBadRequest, "bad request")
 	}
 
-	_, err := db.Exec(ctx, `INSERT INTO players (email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id, user_id) values ($1, $2, $3, $4, 0, 1, 0, 10, 50, 1, null)`,
+	_, err := db.Exec(ctx, `INSERT INTO characters (email, username, race_id, job_id, exp, level, guild_id, inventory_size, po, location_id, user_id) values ($1, $2, $3, $4, 0, 1, 0, 10, 50, 1, null)`,
 		playerForm.Email, playerForm.Username, playerForm.RaceID, playerForm.JobID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request during inserting data"+err.Error())
 		return
 	}
 	var playerID int
-	err = pgxscan.Get(ctx, db, &playerID, `SELECT id from players where email = $1`, playerForm.Email)
+	err = pgxscan.Get(ctx, db, &playerID, `SELECT id from characters where email = $1`, playerForm.Email)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "bad request during get PlayerID"+err.Error())
+		c.JSON(http.StatusBadRequest, "bad request during get CharactersID"+err.Error())
 		return
 	}
 	// Get Job Stats
@@ -203,15 +202,15 @@ func CreatePlayer(c *gin.Context) {
 		c.String(http.StatusBadRequest, "bad request during get Race"+err.Error())
 		return
 	}
-	// Create Player Stats
-	_, err = db.Exec(ctx, `INSERT INTO stats (player_id, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, hp) values ($1, $2, $3, $4,$5,$6,$7,$8,$9,20)`,
+	// Create Characters Stats
+	_, err = db.Exec(ctx, `INSERT INTO stats (character_id, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, hp) values ($1, $2, $3, $4,$5,$6,$7,$8,$9,20)`,
 		playerID, playerJob.Strength, playerJob.Constitution, playerRace.Mana, playerRace.Stamina, playerJob.Dexterity, playerJob.Intelligence, playerRace.Wisdom, playerRace.Charisma)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request during insert Stat"+err.Error())
 		return
 	}
 
-	_, err = db.Exec(ctx, `INSERT INTO equipment (player_id, helmet, chestplate, leggings, boots, mainhand, offhand, accessory_slot_0, accessory_slot_1, accessory_slot_2, accessory_slot_3) VALUES 
+	_, err = db.Exec(ctx, `INSERT INTO equipment (character_id, helmet, chestplate, leggings, boots, mainhand, offhand, accessory_slot_0, accessory_slot_1, accessory_slot_2, accessory_slot_3) VALUES 
     ($1,0,0,0,0,0,0,0,0,0,0)`, playerID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request during insert equipment"+err.Error())
@@ -220,7 +219,7 @@ func CreatePlayer(c *gin.Context) {
 
 	c.Status(http.StatusCreated)
 }
-func AddItemToPlayerInventory(c *gin.Context) {
+func AddItemToCharactersInventory(c *gin.Context) {
 	type Body struct {
 		ItemID   int
 		Quantity int
@@ -241,7 +240,7 @@ func AddItemToPlayerInventory(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -249,14 +248,14 @@ func AddItemToPlayerInventory(c *gin.Context) {
 
 	// verif if user had already item
 	var playerInventory []entities.Inventory
-	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where player_id = $1`, player.ID)
+	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
 	if len(playerInventory) <= 0 {
-		_, err = db.Exec(ctx, `INSERT into inventory (player_id, item_id, quantity) values ($1,$2,$3)`, player.ID, body.ItemID, body.Quantity)
+		_, err = db.Exec(ctx, `INSERT into inventory (character_id, item_id, quantity) values ($1,$2,$3)`, player.ID, body.ItemID, body.Quantity)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -284,7 +283,7 @@ func AddItemToPlayerInventory(c *gin.Context) {
 		}
 		c.JSON(http.StatusCreated, "Item quantity updated")
 	} else {
-		_, err = db.Exec(ctx, `INSERT into inventory (player_id, item_id, quantity) values ($1,$2,$3)`, player.ID, body.ItemID, body.Quantity)
+		_, err = db.Exec(ctx, `INSERT into inventory (character_id, item_id, quantity) values ($1,$2,$3)`, player.ID, body.ItemID, body.Quantity)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -292,7 +291,7 @@ func AddItemToPlayerInventory(c *gin.Context) {
 		c.JSON(http.StatusCreated, "Item add to inventory")
 	}
 }
-func AddPetToPlayer(c *gin.Context) {
+func AddPetToCharacters(c *gin.Context) {
 	type Body struct {
 		PetId int
 	}
@@ -311,21 +310,21 @@ func AddPetToPlayer(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	var playerPets []entities.PlayerPet
-	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM player_pets_mounts where player_id = $1`, player.ID)
+	var playerPets []entities.CharactersPet
+	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM character_pets_mounts where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
 	if len(playerPets) <= 0 {
-		_, err = db.Exec(ctx, `INSERT into player_pets_mounts (player_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
+		_, err = db.Exec(ctx, `INSERT into character_pets_mounts (character_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -347,7 +346,7 @@ func AddPetToPlayer(c *gin.Context) {
 	if havePet {
 		c.JSON(http.StatusBadRequest, "User already have this pet")
 	} else {
-		_, err = db.Exec(ctx, `INSERT into player_pets_mounts (player_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
+		_, err = db.Exec(ctx, `INSERT into character_pets_mounts (character_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -356,7 +355,7 @@ func AddPetToPlayer(c *gin.Context) {
 	}
 
 }
-func AddSkillToPlayer(c *gin.Context) {
+func AddSkillToCharacters(c *gin.Context) {
 	type Body struct {
 		SkillId int
 	}
@@ -375,21 +374,21 @@ func AddSkillToPlayer(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	var playerSkills []entities.PlayerSkill
-	err = pgxscan.Select(ctx, db, &playerSkills, `SELECT skill_id FROM player_skill where player_id = $1`, player.ID)
+	var playerSkills []entities.CharactersSkill
+	err = pgxscan.Select(ctx, db, &playerSkills, `SELECT skill_id FROM character_skill where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
 	if len(playerSkills) <= 0 {
-		_, err = db.Exec(ctx, `INSERT into player_skill (player_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
+		_, err = db.Exec(ctx, `INSERT into character_skill (character_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -411,7 +410,7 @@ func AddSkillToPlayer(c *gin.Context) {
 	if haveSkill {
 		c.JSON(http.StatusBadRequest, "User already have this skill")
 	} else {
-		_, err = db.Exec(ctx, `INSERT into player_skill (player_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
+		_, err = db.Exec(ctx, `INSERT into character_skill (character_id, skill_id) values ($1,$2)`, player.ID, body.SkillId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -422,7 +421,7 @@ func AddSkillToPlayer(c *gin.Context) {
 }
 
 // PATCH \\
-func UpdatePlayerStats(c *gin.Context) {
+func UpdateCharactersStats(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 	var playerStatsForm entities.Stats
@@ -431,7 +430,7 @@ func UpdatePlayerStats(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -459,18 +458,17 @@ func UpdatePlayerStats(c *gin.Context) {
 		return
 	}
 
-	var newPlayerStats entities.Stats
-	err = pgxscan.Get(ctx, db, &newPlayerStats, `SELECT * FROM stats where player_id = $1`, player.ID)
+	var newCharactersStats entities.Stats
 	err = pgxscan.Get(ctx, db, &newCharactersStats, `SELECT character_id, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma, hp FROM stats where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	c.JSON(http.StatusOK, &newPlayerStats)
+	c.JSON(http.StatusOK, &newCharactersStats)
 
 }
-func UpdatePlayer(c *gin.Context) {
+func UpdateCharacters(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
@@ -487,19 +485,19 @@ func UpdatePlayer(c *gin.Context) {
 		return
 	}
 
-	selectedPlayer, err := repository.GetPlayerByID(ctx, db, id)
+	selectedCharacters, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	_, err = db.Exec(ctx, `UPDATE player set (exp, level, inventory_size, po) = ($2,$3,$4,$5) where id = $1`, id, playerInfoUpdatableForm.Exp+selectedPlayer.Exp, playerInfoUpdatableForm.Level+selectedPlayer.Level, playerInfoUpdatableForm.InventorySize+selectedPlayer.InventorySize, playerInfoUpdatableForm.Po+selectedPlayer.Po)
+	_, err = db.Exec(ctx, `UPDATE player set (exp, level, inventory_size, po) = ($2,$3,$4,$5) where id = $1`, id, playerInfoUpdatableForm.Exp+selectedCharacters.Exp, playerInfoUpdatableForm.Level+selectedCharacters.Level, playerInfoUpdatableForm.InventorySize+selectedCharacters.InventorySize, playerInfoUpdatableForm.Po+selectedCharacters.Po)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
 }
-func UpdatePlayerLocation(c *gin.Context) {
+func UpdateCharactersLocation(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
@@ -517,7 +515,7 @@ func UpdatePlayerLocation(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -539,7 +537,7 @@ func UpdatePlayerLocation(c *gin.Context) {
 	c.JSON(http.StatusOK, &player)
 
 }
-func UpdatePlayerEquipment(c *gin.Context) {
+func UpdateCharactersEquipment(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
@@ -554,7 +552,7 @@ func UpdatePlayerEquipment(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -577,69 +575,68 @@ func UpdatePlayerEquipment(c *gin.Context) {
 	switch playerEquipmentForm.Emplacement {
 	case "Helmet":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Helmet") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Helmet, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Helmet, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "helmet", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "helmet", db, c)
 	case "Chestplate":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Chestplate") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Chestplate, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Chestplate, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "chestplate", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "chestplate", db, c)
 	case "Leggings":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Leggings") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Leggings, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Leggings, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "leggings", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "leggings", db, c)
 	case "Boots":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Boots") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Boots, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Boots, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "boots", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "boots", db, c)
 	case "Mainhand":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "MainHand") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Mainhand, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Mainhand, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "mainhand", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "mainhand", db, c)
 	case "Offhand":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "OffHand") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.Offhand, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.Offhand, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "offhand", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "offhand", db, c)
 	case "AccessorySlot0":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory0") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot0, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot0, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_0", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "accessory_slot_0", db, c)
 	case "AccessorySlot1":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory1") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot1, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot1, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_1", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "accessory_slot_1", db, c)
 	case "AccessorySlot2":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory2") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot2, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot2, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_2", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "accessory_slot_2", db, c)
 	case "AccessorySlot3":
 		if repository.CheckEquipmentEmplacement(playerEquipments, "Accesory3") {
-			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot3, playerEquipments.PlayerId, 1, db, c)
+			repository.DoUpsertItemInInventory(ctx, playerEquipments.AccessorySlot3, playerEquipments.CharactersId, 1, db, c)
 		}
-		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.PlayerId, "accessory_slot_3", db, c)
+		repository.DoUpdateEquipment(ctx, playerEquipmentForm.ItemID, playerEquipments.CharactersId, "accessory_slot_3", db, c)
 	default:
 		break
 	}
 
-	var newPlayerEquipment entities.Equipment
-	err = pgxscan.Get(ctx, db, &newPlayerEquipment, `SELECT * FROM equipment where player_id = $1`, player.ID)
+	var newCharactersEquipment entities.Equipment
 	err = pgxscan.Get(ctx, db, &newCharactersEquipment, `SELECT character_id, helmet, chestplate, leggings, boots, mainhand, offhand, accessory_slot_0, accessory_slot_1, accessory_slot_2, accessory_slot_3 FROM equipment where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request during getting current equipment")
 		return
 	}
 
-	c.JSON(http.StatusOK, &newPlayerEquipment)
+	c.JSON(http.StatusOK, &newCharactersEquipment)
 }
-func UpdatePlayerInventory(c *gin.Context) {
+func UpdateCharactersInventory(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
@@ -654,7 +651,7 @@ func UpdatePlayerInventory(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -670,14 +667,14 @@ func UpdatePlayerInventory(c *gin.Context) {
 	repository.DoUpsertItemInInventory(ctx, playerItemForm.itemID, player.ID, playerItemForm.quantity, db, c)
 
 	var playerInventory []entities.Inventory
-	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where player_id = $1`, player.ID)
+	err = pgxscan.Select(ctx, db, &playerInventory, `SELECT item_id, quantity FROM inventory where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 	c.JSON(http.StatusOK, &playerInventory)
 }
-func UpdatePlayerPets(c *gin.Context) {
+func UpdateCharactersPets(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 	type Body struct {
@@ -691,7 +688,7 @@ func UpdatePlayerPets(c *gin.Context) {
 		return
 	}
 	// check if player exist
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -704,10 +701,10 @@ func UpdatePlayerPets(c *gin.Context) {
 		return
 	}
 	// check if player already have this pet
-	var playerPets entities.PlayerPet
-	err = pgxscan.Get(ctx, db, &playerPets, `SELECT pet_id FROM player_pets_mounts where pet_id = $1`, playerPetForm.PetsID)
+	var playerPets entities.CharactersPet
+	err = pgxscan.Get(ctx, db, &playerPets, `SELECT pet_id FROM character_pets_mounts where pet_id = $1`, playerPetForm.PetsID)
 	if errors.Is(err, pgx.ErrNoRows) {
-		_, insertErr := db.Exec(ctx, `INSERT INTO player_pets_mounts (pet_id, player_id) values ($1,$2)`, playerPetForm.PetsID, player.ID)
+		_, insertErr := db.Exec(ctx, `INSERT INTO character_pets_mounts (pet_id, character_id) values ($1,$2)`, playerPetForm.PetsID, player.ID)
 		if insertErr != nil {
 			c.String(http.StatusBadRequest, "bad request inserting user's pets")
 			return
@@ -727,7 +724,7 @@ func UpdatePlayerPets(c *gin.Context) {
 		}
 
 		var petScroll entities.Item
-		err = pgxscan.Get(ctx, db, &petScroll, `SELECT * FROM items where name like '%$1%'`, mob.Name)
+		err = pgxscan.Get(ctx, db, &petScroll, `SELECT id FROM items where name like '%$1%'`, mob.Name)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -738,7 +735,7 @@ func UpdatePlayerPets(c *gin.Context) {
 		c.JSON(http.StatusOK, "You Already have this pet, you got his scroll")
 	}
 }
-func UpdatePlayerSkills(c *gin.Context) {
+func UpdateCharactersSkills(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 	type Body struct {
@@ -752,7 +749,7 @@ func UpdatePlayerSkills(c *gin.Context) {
 		return
 	}
 	// check if player exist
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -765,10 +762,10 @@ func UpdatePlayerSkills(c *gin.Context) {
 		return
 	}
 	// check if player already have this pet
-	var playerSkills entities.PlayerSkill
-	err = pgxscan.Get(ctx, db, &playerSkills, `SELECT skill_id FROM player_skill where skill_id = $1`, playerSkillForm.SkillID)
+	var playerSkills entities.CharactersSkill
+	err = pgxscan.Get(ctx, db, &playerSkills, `SELECT skill_id FROM character_skill where skill_id = $1`, playerSkillForm.SkillID)
 	if errors.Is(err, pgx.ErrNoRows) {
-		_, insertErr := db.Exec(ctx, `INSERT INTO player_skill (skill_id, player_id) values ($1,$2)`, playerSkillForm.SkillID, player.ID)
+		_, insertErr := db.Exec(ctx, `INSERT INTO character_skill (skill_id, character_id) values ($1,$2)`, playerSkillForm.SkillID, player.ID)
 		if insertErr != nil {
 			c.String(http.StatusBadRequest, "bad request inserting user's skill")
 			return
@@ -783,7 +780,7 @@ func UpdatePlayerSkills(c *gin.Context) {
 	if playerSkills.SkillID != 0 {
 
 		var skillScroll entities.Item
-		err = pgxscan.Get(ctx, db, &skillScroll, `SELECT * FROM items where name like '%$1%'`, selectedSkill.Name)
+		err = pgxscan.Get(ctx, db, &skillScroll, `SELECT id FROM items where name like '%$1%'`, selectedSkill.Name)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
@@ -798,62 +795,62 @@ func UpdatePlayerSkills(c *gin.Context) {
 
 // DELETE \\
 
-func DeletePlayer(c *gin.Context) {
+func DeleteCharacters(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 	// check if player exist
-	player, err := repository.GetPlayerByID(ctx, db, id)
+	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "bad request during getting Player"+err.Error())
+		c.JSON(http.StatusBadRequest, "bad request during getting Characters"+err.Error())
 		return
 	}
 
 	// delete pets
-	_, err = db.Exec(ctx, `DELETE from player_pets_mounts  where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from character_pets_mounts  where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request deleting player's pets")
 		return
 	}
 	// delete skills
-	_, err = db.Exec(ctx, `DELETE from player_skill where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from character_skill where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad  request deleting player's skills")
 		return
 	}
 	// delete inventory
-	_, err = db.Exec(ctx, `DELETE from inventory where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from inventory where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad  request deleting player's inventory")
 		return
 	}
 	// delete equipment
-	_, err = db.Exec(ctx, `DELETE from equipment where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from equipment where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad  request deleting player's equipment")
 		return
 	}
 	// delete stat
-	_, err = db.Exec(ctx, `DELETE from stats where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from stats where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad  request deleting player's stats")
 		return
 	}
 	// delete player action
 
-	_, err = db.Exec(ctx, `DELETE from players_actions where player_id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from character_actions where character_id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad  request deleting player's action")
 		return
 	}
 
 	// delete player
-	_, err = db.Exec(ctx, `DELETE from players where id = $1`, player.ID)
+	_, err = db.Exec(ctx, `DELETE from characters where id = $1`, player.ID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad  request deleting player")
 		return
 	}
 }
-func DeletePlayerItemInInventory(c *gin.Context) {
+func DeleteCharactersItemInInventory(c *gin.Context) {
 	db := database.Connect()
 	playerID := c.Param("player")
 	itemID := c.Param("item")
@@ -864,13 +861,13 @@ func DeletePlayerItemInInventory(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, playerID)
+	player, err := repository.GetCharactersByID(ctx, db, playerID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	_, deleteErr := db.Exec(ctx, `DELETE FROM inventory where item_id = $1 and player_id = $2`, item.ID, player.ID)
+	_, deleteErr := db.Exec(ctx, `DELETE FROM inventory where item_id = $1 and character_id = $2`, item.ID, player.ID)
 	if deleteErr != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -879,7 +876,7 @@ func DeletePlayerItemInInventory(c *gin.Context) {
 	c.Status(http.StatusOK)
 
 }
-func DeletePlayerPets(c *gin.Context) {
+func DeleteCharactersPets(c *gin.Context) {
 	db := database.Connect()
 	playerID := c.Param("player")
 	petID := c.Param("pet")
@@ -890,13 +887,13 @@ func DeletePlayerPets(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, playerID)
+	player, err := repository.GetCharactersByID(ctx, db, playerID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	_, deleteErr := db.Exec(ctx, `DELETE FROM player_pets_mounts where pet_id = $1 and player_id = $2`, pet.ID, player.ID)
+	_, deleteErr := db.Exec(ctx, `DELETE FROM character_pets_mounts where pet_id = $1 and character_id = $2`, pet.ID, player.ID)
 	if deleteErr != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -904,7 +901,7 @@ func DeletePlayerPets(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
-func DeletePlayerSkill(c *gin.Context) {
+func DeleteCharactersSkill(c *gin.Context) {
 	db := database.Connect()
 	playerID := c.Param("player")
 	skillID := c.Param("skill")
@@ -915,13 +912,13 @@ func DeletePlayerSkill(c *gin.Context) {
 		return
 	}
 
-	player, err := repository.GetPlayerByID(ctx, db, playerID)
+	player, err := repository.GetCharactersByID(ctx, db, playerID)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
 	}
 
-	_, deleteErr := db.Exec(ctx, `DELETE FROM player_skill where skill_id = $1 and player_id = $2`, skill.ID, player.ID)
+	_, deleteErr := db.Exec(ctx, `DELETE FROM character_skill where skill_id = $1 and character_id = $2`, skill.ID, player.ID)
 	if deleteErr != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return

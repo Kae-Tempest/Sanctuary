@@ -6,7 +6,7 @@ import (
 )
 
 type Equipment struct {
-	PlayerId       int `json:"player_id"`
+	CharactersId   int `json:"player_id"`
 	Helmet         int `json:"helmet"`
 	Chestplate     int `json:"chestplate"`
 	Leggings       int `json:"leggings"`
@@ -27,23 +27,23 @@ type Guild struct {
 }
 
 type GuildMembers struct {
-	ID       int `json:"id"`
-	GuildId  int `json:"guild_id"`
-	PlayerID int `json:"player_id"`
+	ID           int `json:"id"`
+	GuildId      int `json:"guild_id"`
+	CharactersID int `json:"player_id"`
 }
 
 type HuntAction struct {
-	PlayerID   int       `json:"playerID"`
-	LocationID int       `json:"locationID"`
-	MobID      int       `json:"mobID"`
-	StartAt    time.Time `json:"startAt"`
-	EndAt      time.Time `json:"endAt"`
+	CharactersID int       `json:"playerID"`
+	LocationID   int       `json:"locationID"`
+	MobID        int       `json:"mobID"`
+	StartAt      time.Time `json:"startAt"`
+	EndAt        time.Time `json:"endAt"`
 }
 
 type Inventory struct {
-	PlayerID int `json:"player_id"`
-	ItemID   int `json:"item_id"`
-	Quantity int `json:"quantity"`
+	CharactersID int `json:"player_id"`
+	ItemID       int `json:"item_id"`
+	Quantity     int `json:"quantity"`
 }
 
 type Item struct {
@@ -162,22 +162,22 @@ type PetsMounts struct {
 	Speed       int  `json:"speed"` // 0 = slow, 1 = normal, 2 = fast
 }
 
-type PlayerJobSkill struct {
-	PlayerId int
-	SkillID  int
+type CharactersJobSkill struct {
+	CharactersId int
+	SkillID      int
 }
 
-type PlayerPet struct {
-	PetID    int `json:"pet_id"`
-	PlayerId int `json:"user_id"`
+type CharactersPet struct {
+	PetID        int `json:"pet_id"`
+	CharactersId int `json:"user_id"`
 }
 
-type PlayerSkill struct {
-	PlayerId int
-	SkillID  int
+type CharactersSkill struct {
+	CharactersId int
+	SkillID      int
 }
 
-type Player struct {
+type Characters struct {
 	ID            int           `json:"id"`
 	UserID        sql.Null[int] `json:"userID"`
 	Email         string        `json:"email"`
@@ -192,11 +192,11 @@ type Player struct {
 	LocationId    int           `json:"locationId"`
 }
 
-type PlayerAction struct {
-	PlayerId  int       `json:"user_id"`
-	Action    string    `json:"action"`
-	CreatedAt time.Time `json:"created_at"`
-	EndAt     time.Time `json:"end_at"`
+type CharactersAction struct {
+	CharactersId int       `json:"user_id"`
+	Action       string    `json:"action"`
+	CreatedAt    time.Time `json:"created_at"`
+	EndAt        time.Time `json:"end_at"`
 }
 
 type Quests struct {
@@ -265,7 +265,7 @@ type SkillStat struct {
 }
 
 type Stats struct {
-	PlayerId     int `json:"user_id"`
+	CharactersId int `json:"user_id"`
 	HP           int `json:"HP"`
 	Strength     int `json:"strength"`
 	Constitution int `json:"constitution"`
@@ -279,7 +279,7 @@ type Stats struct {
 
 type SummonBeast struct {
 	ID           int    `json:"id"`
-	PlayerId     int    `json:"user_id"`
+	CharactersId int    `json:"user_id"`
 	Name         string `json:"name"`
 	Strength     int    `json:"strength"`
 	Constitution int    `json:"constitution"`

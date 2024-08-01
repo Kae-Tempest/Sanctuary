@@ -220,8 +220,8 @@ func DeleteItem(c *gin.Context) {
 		return
 	}
 
-	// get Player with item
-	players, getErr := repository.GetPlayersWithItem(ctx, db, item.ID)
+	// get Characters with item
+	players, getErr := repository.GetCharactersWithItem(ctx, db, item.ID)
 	if getErr != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
@@ -229,21 +229,21 @@ func DeleteItem(c *gin.Context) {
 
 	for _, player := range players {
 		// get inventory
-		inventory, invErr := repository.GetPlayerInventoryByID(ctx, db, player.ID)
+		inventory, invErr := repository.GetCharactersInventoryByID(ctx, db, player.ID)
 		if invErr != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
 		// del item in inventory
 		for _, invItem := range inventory {
-			_, delErr := db.Exec(ctx, `DELETE FROM inventory where player_id = $1 AND item_id = $2`, player.ID, invItem.ItemID)
+			_, delErr := db.Exec(ctx, `DELETE FROM inventory where character_id = $1 AND item_id = $2`, player.ID, invItem.ItemID)
 			if delErr != nil {
 				c.JSON(http.StatusBadRequest, "bad request")
 				return
 			}
 		}
 		// get equipment
-		equipment, equipErr := repository.GetPlayerEquipmentByID(ctx, db, player.ID)
+		equipment, equipErr := repository.GetCharactersEquipmentByID(ctx, db, player.ID)
 		if equipErr != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return

@@ -29,7 +29,7 @@ func GetAllMobs(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{})
 	}
 }
-func GetOneMob(c *gin.Context) {
+func GetMobByID(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
@@ -354,7 +354,7 @@ func DeleteMob(c *gin.Context) {
 			return
 		}
 		// delete pets to all user
-		_, deleteErr = db.Exec(ctx, `DELETE FROM player_pets_mounts where pet_id = $1`, selectedPets.ID)
+		_, deleteErr = db.Exec(ctx, `DELETE FROM character_pets_mounts where pet_id = $1`, selectedPets.ID)
 		if deleteErr != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return

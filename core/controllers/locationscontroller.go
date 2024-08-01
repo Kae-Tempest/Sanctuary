@@ -36,11 +36,11 @@ func GetLocationByID(c *gin.Context) {
 	c.JSON(http.StatusOK, &location)
 
 }
-func GetPlayersByLocation(c *gin.Context) {
+func GetCharactersByLocation(c *gin.Context) {
 	db := database.Connect()
 	id := c.Param("id")
 
-	players, err := repository.GetPlayersByLocation(ctx, db, id)
+	players, err := repository.GetCharactersByLocation(ctx, db, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -153,7 +153,7 @@ func DeleteLocation(c *gin.Context) {
 		return
 	}
 
-	players, err := repository.GetPlayersByLocation(ctx, db, id)
+	players, err := repository.GetCharactersByLocation(ctx, db, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
@@ -165,7 +165,7 @@ func DeleteLocation(c *gin.Context) {
 		return
 	}
 
-	updateErr := repository.UpdatePlayersLocation(ctx, db, newLocation.ID, players)
+	updateErr := repository.UpdateCharactersLocation(ctx, db, newLocation.ID, players)
 	if updateErr != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return
