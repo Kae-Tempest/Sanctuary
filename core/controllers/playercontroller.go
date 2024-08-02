@@ -292,68 +292,65 @@ func AddItemToCharactersInventory(c *gin.Context) {
 	}
 }
 func AddPetToCharacters(c *gin.Context) {
-	type Body struct {
-		PetId int
-	}
 	db := database.Connect()
 	id := c.Param("id")
-	var body Body
-	if err := c.ShouldBindJSON(&body); err != nil {
+	type Body struct {
+		PetsID int
+	}
+
+	var playerPetForm Body
+	err := c.ShouldBindBodyWithJSON(&playerPetForm)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	var selectedPet entities.PetsMounts
-	err := pgxscan.Get(ctx, db, &selectedPet, `SELECT id FROM pets_mounts where id = $1`, body.PetId)
-	if err != nil {
-		c.JSON(http.StatusNotFound, "Pet with this ID doesn't exist !")
-		return
-	}
-
+	// check if player exist
 	player, err := repository.GetCharactersByID(ctx, db, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "bad request")
 		return
 	}
-
-	var playerPets []entities.CharactersPet
-	err = pgxscan.Select(ctx, db, &playerPets, `SELECT pet_id FROM character_pets_mounts where character_id = $1`, player.ID)
+	// check if pet exist
+	var selectedPet entities.PetsMounts
+	err = pgxscan.Get(ctx, db, &selectedPet, `SELECT id FROM pets_mounts where id = $1`, playerPetForm.PetsID)
 	if err != nil {
-		c.String(http.StatusBadRequest, "bad request")
+		c.String(http.StatusBadRequest, "bad request selecting pets")
 		return
 	}
-
-	if len(playerPets) <= 0 {
-		_, err = db.Exec(ctx, `INSERT into character_pets_mounts (character_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
+	// check if player already have this pet
+	var playerPets entities.CharactersPet
+	err = pgxscan.Get(ctx, db, &playerPets, `SELECT pet_id FROM character_pets_mounts where pet_id = $1`, playerPetForm.PetsID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		_, insertErr := db.Exec(ctx, `INSERT INTO character_pets_mounts (pet_id, character_id) values ($1,$2)`, playerPetForm.PetsID, player.ID)
+		if insertErr != nil {
+			c.String(http.StatusBadRequest, "bad request inserting user's pets")
+			return
+		}
+		c.JSON(http.StatusOK, "New Pet Added")
+	}
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		c.String(http.StatusBadRequest, "bad request selecting user's pets")
+		return
+	}
+	if playerPets.PetID != 0 {
+		var mob entities.Mob
+		err = pgxscan.Get(ctx, db, &mob, `SELECT name from mobs where id = $1`, selectedPet.MobID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
-		c.JSON(http.StatusCreated, "First pet get by User")
-	}
 
-	var havePet = false
-	for _, pet := range playerPets {
-		if pet.PetID == body.PetId {
-			havePet = true
-			break
-		} else {
-			havePet = false
-			continue
-		}
-	}
-
-	if havePet {
-		c.JSON(http.StatusBadRequest, "User already have this pet")
-	} else {
-		_, err = db.Exec(ctx, `INSERT into character_pets_mounts (character_id, pet_id) values ($1,$2)`, player.ID, body.PetId)
+		var petScroll entities.Item
+		err = pgxscan.Get(ctx, db, &petScroll, `SELECT id FROM items where name like '%$1%'`, mob.Name)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, "bad request")
 			return
 		}
-		c.JSON(http.StatusCreated, "User tamed this pet")
-	}
 
+		repository.DoUpsertItemInInventory(ctx, petScroll.ID, player.ID, 1, db, c)
+
+		c.JSON(http.StatusOK, "You Already have this pet, you got his scroll")
+	}
 }
 func AddSkillToCharacters(c *gin.Context) {
 	type Body struct {
@@ -673,67 +670,6 @@ func UpdateCharactersInventory(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, &playerInventory)
-}
-func UpdateCharactersPets(c *gin.Context) {
-	db := database.Connect()
-	id := c.Param("id")
-	type Body struct {
-		PetsID int
-	}
-
-	var playerPetForm Body
-	err := c.ShouldBindBodyWithJSON(&playerPetForm)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	// check if player exist
-	player, err := repository.GetCharactersByID(ctx, db, id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "bad request")
-		return
-	}
-	// check if pet exist
-	var selectedPet entities.PetsMounts
-	err = pgxscan.Get(ctx, db, &selectedPet, `SELECT id FROM pets_mounts where id = $1`, playerPetForm.PetsID)
-	if err != nil {
-		c.String(http.StatusBadRequest, "bad request selecting pets")
-		return
-	}
-	// check if player already have this pet
-	var playerPets entities.CharactersPet
-	err = pgxscan.Get(ctx, db, &playerPets, `SELECT pet_id FROM character_pets_mounts where pet_id = $1`, playerPetForm.PetsID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		_, insertErr := db.Exec(ctx, `INSERT INTO character_pets_mounts (pet_id, character_id) values ($1,$2)`, playerPetForm.PetsID, player.ID)
-		if insertErr != nil {
-			c.String(http.StatusBadRequest, "bad request inserting user's pets")
-			return
-		}
-		c.JSON(http.StatusOK, "New Pet Added")
-	}
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		c.String(http.StatusBadRequest, "bad request selecting user's pets")
-		return
-	}
-	if playerPets.PetID != 0 {
-		var mob entities.Mob
-		err = pgxscan.Get(ctx, db, &mob, `SELECT name from mobs where id = $1`, selectedPet.MobID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, "bad request")
-			return
-		}
-
-		var petScroll entities.Item
-		err = pgxscan.Get(ctx, db, &petScroll, `SELECT id FROM items where name like '%$1%'`, mob.Name)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, "bad request")
-			return
-		}
-
-		repository.DoUpsertItemInInventory(ctx, petScroll.ID, player.ID, 1, db, c)
-
-		c.JSON(http.StatusOK, "You Already have this pet, you got his scroll")
-	}
 }
 func UpdateCharactersSkills(c *gin.Context) {
 	db := database.Connect()
