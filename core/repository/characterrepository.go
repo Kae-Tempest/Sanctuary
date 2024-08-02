@@ -105,7 +105,6 @@ func GetCharactersWithItem(ctx context.Context, db *pgxpool.Pool, itemID int) ([
 	if err != nil {
 		return players, err
 	}
-	fmt.Println(players)
 	return players, nil
 }
 

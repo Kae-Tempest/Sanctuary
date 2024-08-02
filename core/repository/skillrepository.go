@@ -30,7 +30,8 @@ func GetSkillByName(ctx context.Context, db *pgxpool.Pool, skillName string) (en
 }
 
 func GetSkillByID(ctx context.Context, db *pgxpool.Pool, skillID string) (entities.Skill, error) {
-	rows := db.QueryRow(ctx, `SELECT id, name, description, type FROM skills where id = $1`, skillID)
+	rows := db.QueryRow(ctx, `SELECT id, name, description, type, strength, constitution, mana, stamina, dexterity, intelligence, wisdom, charisma 
+	FROM skills s join skill_stats on s.id = skill_stats.skill_id where id = $1`, skillID)
 
 	skill, err := AssignOneRowSkill(rows)
 	if err != nil {
