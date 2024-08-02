@@ -85,7 +85,7 @@ func main() {
 	mobs.DELETE("/:id/skill", controllers.DeleteMobSkill)
 	mobs.DELETE("/:id/loot", controllers.DeleteMobLoot)
 
-	///             LOCATIONS             \\\ TODO : Definir des actions possible / zones
+	///             LOCATIONS             \\\
 	locations := r.Group("/")
 	// GET \\
 	locations.GET("/", controllers.GetLocations)
@@ -97,10 +97,12 @@ func main() {
 	locations.GET("/:id/loots")
 	// POST \\
 	locations.POST("/", controllers.CreateLocation)
+	locations.POST("/:id/actions")
 	// PATCH \\
 	locations.PATCH("/:id", controllers.UpdateLocation)
 	//DELETE\\
 	locations.DELETE("/:id", controllers.DeleteLocation)
+	locations.DELETE("/:id/actions")
 
 	///             ITEMS             \\\
 	items := r.Group("/items")
@@ -116,7 +118,7 @@ func main() {
 	items.PATCH("/:id/emplacement", controllers.UpdateItemEmplacement)
 	//DELETE\\
 	items.DELETE("/:id", controllers.DeleteItem)
-	///             SKILL             \\\ TODO : Gestion d'assignation de skill
+	///             SKILL             \\\
 	skills := r.Group("/skills")
 	// GET \\
 	skills.GET("/", controllers.GetSkills)
@@ -132,87 +134,86 @@ func main() {
 	///             RACE             \\\
 	races := r.Group("/races")
 	// GET \\
-	races.GET("/races")
-	races.GET("/race/:id")
+	races.GET("/")
+	races.GET("/:id")
 	// POST \\
-	races.POST("/race/create")
+	races.POST("/")
 	// PATCH \\
-	races.PATCH("/race/:id")
+	races.PATCH("/:id")
 	//DELETE\\
-	races.DELETE("/race/:id")
+	races.DELETE("/:id")
 	///             JOB             \\\
 	jobs := r.Group("jobs")
 	// GET \\
-	jobs.GET("/jobs")
-	jobs.GET("/job/:id")
-	jobs.GET("/job/:id/skills")
-	jobs.GET("/job/:id/skill/:skill")
+	jobs.GET("")
+	jobs.GET("/:id")
+	jobs.GET("/:id/skills")
+	jobs.GET("/:id/skill/:skill")
+	jobs.GET("/:id/skill_tree")
 	// POST \\
-	jobs.POST("/job/create")
-	jobs.POST("/job/skill/create")
+	jobs.POST("/")
+	jobs.POST("/skill")
 	// PATCH \\
-	jobs.PATCH("/job/:id")
-	jobs.PATCH("/job/skill/:id")
+	jobs.PATCH("/:id")
+	jobs.PATCH("/skill/:id")
 	//DELETE\\
-	jobs.DELETE("/job/:id")
-	jobs.DELETE("/job/skill/:id")
+	jobs.DELETE("/:id")
+	jobs.DELETE("/skill/:id")
 
 	///             ACTION LOGS            \\\
 	logs := r.Group("/logs")
 	// GET \\
-	logs.GET("/actions")
-	logs.GET("/actions/:player")
-	logs.GET("/actions/:type")
+	logs.GET("/")
+	logs.GET("/:player")
+	logs.GET("/:type")
 	// POST \\
-	logs.POST("/action/create")
+	logs.POST("/")
 	// PATCH \\
-	logs.PATCH("/action/:id")
+	logs.PATCH("/:id")
 	//DELETE\\
-	logs.DELETE("/action/:id")
+	logs.DELETE("/:id")
 	///             GUILD             \\\
 	guilds := r.Group("/guilds")
 	// GET \\
-	guilds.GET("/guilds")
-	guilds.GET("/guild/:id")
-	guilds.GET("/guild/owner/:owner")
-	guilds.GET("guild/:id/members")
+	guilds.GET("/")
+	guilds.GET("/:id")
+	guilds.GET("/owner/:owner")
+	guilds.GET("/:id/members")
 	// POST \\
-	guilds.POST("/guild/create")
-	guilds.POST("/guild/:id/invite/:player")
+	guilds.POST("/")
+	guilds.POST("/:id/invite/:player")
 	// PATCH \\
-	guilds.PATCH("/guild/:id")
+	guilds.PATCH("/:id")
 	//DELETE\\
-	guilds.DELETE("/guild/:id")
+	guilds.DELETE("/:id")
 	guilds.DELETE("/guild/:id/eject/:player")
 	///             QUEST             \\\
 	quests := r.Group("/quests")
 	// GET \\
-	quests.GET("/quests")
-	quests.GET("/quest/:id")
-	quests.GET("/quest/type/:type")
-	quests.GET("/quest/rank/:rank")
+	quests.GET("/")
+	quests.GET("/:id")
+	quests.GET("/type/:type")
+	quests.GET("/rank/:rank")
 	// POST \\
-	quests.POST("/quest/create")
+	quests.POST("/")
 	// PATCH \\
-	quests.PATCH("/quest/:id")
+	quests.PATCH("/:id")
 	//DELETE\\
-	quests.DELETE("/quest/:id")
+	quests.DELETE("/:id")
 
-	///             RESOURCE             \\\ TODO : Revoir les resources ( + DB )
+	///             RESOURCE             \\\
+	resources := r.Group("/resources")
 	// GET \\
-	r.GET("/resources")
-	r.GET("/resource/:id")
-	r.GET("/resource/type/:type")
-	r.GET("/resource/location/:id")
+	resources.GET("/")
+	resources.GET("/:id")
+	resources.GET("/type/:type")
+	resources.GET("/:id/location")
 	// POST \\
-	r.POST("/resource/create")
-	r.POST("/resource/type/create")
+	resources.POST("/create")
 	// PATCH \\
-	r.PATCH("/resource/:id")
-	r.PATCH("/resource/type/:id")
+	resources.PATCH("/:id")
 	//DELETE\\
-	r.DELETE("/resource/:id")
-	r.DELETE("/resource/type/:id")
+	resources.DELETE("/:id")
 
 	err = r.Run(":8000")
 	if err != nil {
