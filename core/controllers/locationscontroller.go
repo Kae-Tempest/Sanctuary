@@ -65,7 +65,7 @@ func GetResourcesByLocation(c *gin.Context) {
 	id := c.Param("id")
 
 	var resources []entities.Resources
-	err := pgxscan.Select(ctx, db, &resources, `SELECT id, name, location_id, ressources_type_id, quantities_per_min FROM resources where location_id = $1`, id)
+	err := pgxscan.Select(ctx, db, &resources, `SELECT id, name, location_id, item_id, quantities_per_min FROM resources where location_id = $1`, id)
 	if err != nil {
 		c.String(http.StatusBadRequest, "bad request")
 		return

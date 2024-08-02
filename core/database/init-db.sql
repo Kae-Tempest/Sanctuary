@@ -287,17 +287,6 @@ create table character_actions
 alter table character_actions
     owner to postgres;
 
-create table resources_types
-(
-    id   serial
-        constraint resources_types_pk
-            primary key,
-    name varchar(50)
-);
-
-alter table resources_types
-    owner to postgres;
-
 create table resources
 (
     id                 integer default nextval('ressources_id_seq'::regclass) not null
@@ -307,29 +296,13 @@ create table resources
     location_id        integer
         constraint ressources_locations_id_fk
             references locations,
-    ressources_type_id integer
-        constraint ressources_resources_types_id_fk
-            references resources_types,
-    quantities_per_min integer
+    quantities_per_min integer,
+    item_id            integer
+        constraint resources_items_id_fk
+            references items
 );
 
 alter table resources
-    owner to postgres;
-
-create table ressource_inventory
-(
-    character_id integer
-        constraint ressource_inventory_players_id_fk
-            references characters,
-    item_id      integer
-        constraint ressource_inventory_pk
-            unique
-        constraint ressource_inventory_resources_id_fk
-            references resources,
-    quantity     integer
-);
-
-alter table ressource_inventory
     owner to postgres;
 
 create table mob_spawn
