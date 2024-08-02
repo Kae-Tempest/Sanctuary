@@ -145,7 +145,7 @@ func main() {
 	///             JOB             \\\
 	jobs := r.Group("jobs")
 	// GET \\
-	jobs.GET("")
+	jobs.GET("/")
 	jobs.GET("/:id")
 	jobs.GET("/:id/skills")
 	jobs.GET("/:id/skill/:skill")
