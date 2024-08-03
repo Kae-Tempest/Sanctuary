@@ -81,8 +81,8 @@ func main() {
 	mobs.PATCH("/:id/loot", controllers.UpdateMobLoot)
 	//DELETE\\
 	mobs.DELETE("/:id", controllers.DeleteMob)
-	mobs.DELETE("/:id/spawn", controllers.DeleteMobSpawn)
-	mobs.DELETE("/:id/skill", controllers.DeleteMobSkill)
+	mobs.DELETE("/:id/spawn/:spawn", controllers.DeleteMobSpawn)
+	mobs.DELETE("/:id/skill/:skill", controllers.DeleteMobSkill)
 	mobs.DELETE("/:id/loot", controllers.DeleteMobLoot)
 
 	///             LOCATIONS             \\\
